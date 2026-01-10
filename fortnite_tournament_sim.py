@@ -19,24 +19,18 @@ class Colors:
     DIM = "\033[2m"
     ITALIC = "\033[3m"
     
-    # Softer, pastel tones (light & muted)
-    SOFT_RED     = "\033[38;2;255;102;102m"    # light coral
-    SOFT_GREEN   = "\033[38;2;102;204;102m"    # mint green
-    SOFT_YELLOW  = "\033[38;2;255;204;102m"    # soft peach/gold
-    SOFT_BLUE    = "\033[38;2;102;153;255m"    # sky blue
-    SOFT_PURPLE  = "\033[38;2;204;153;255m"    # lavender
-    SOFT_CYAN    = "\033[38;2;102;204;204m"    # light turquoise
+    SOFT_RED     = "\033[38;2;255;102;102m"
+    SOFT_GREEN   = "\033[38;2;102;204;102m"
+    SOFT_YELLOW  = "\033[38;2;255;204;102m"
+    SOFT_BLUE    = "\033[38;2;102;153;255m"
+    SOFT_PURPLE  = "\033[38;2;204;153;255m"
+    SOFT_CYAN    = "\033[38;2;102;204;204m"
     
-    # Very light neutrals for backgrounds/accents (subtle)
     LIGHT_GRAY   = "\033[38;2;150;150;150m"
     VERY_LIGHT_GRAY = "\033[38;2;230;230;235m"
     WARM_WHITE   = "\033[38;2;245;245;240m"
     
-    # Headers / borders
-    BORDER_BLUE  = "\033[38;2;150;180;220m"    # very soft steel blue
-    
-    # Special
-    RAINBOW = ["\033[91m", "\033[93m", "\033[92m", "\033[94m", "\033[95m", "\033[96m"]
+    BORDER_BLUE  = "\033[38;2;150;180;220m"
 
 ACTIVE_MODS = [
     TechnicalIssuesMod(crash_chance=0.008, no_load_chance=0.012),
@@ -99,9 +93,6 @@ def sim_sleep(seconds):
     else:  # NORMAL
         time.sleep(seconds)
 
-# -----------------------------------------------------------
-# PRO PLAYER NAMES + DESCENDING SKILLS + ARCHETYPES
-# -----------------------------------------------------------
 
 pro_players_skills = [
     ("Swizzy", 110, "Fragger", "Free Agent"),
@@ -207,14 +198,6 @@ pro_players_skills = [
 ]
 
 ARCHETYPES = ["Fragger", "Passive", "Strategist", "Aggressive"]
-
-# -----------------------------------------------------------
-# ORG TAGS + DISPLAY NAME
-# -----------------------------------------------------------
-
-# -----------------------------------------------------------
-# PRIZE POOL
-# -----------------------------------------------------------
 
 TOURNAMENT_TYPES = {
     "CASH_CUP": {
@@ -348,10 +331,6 @@ def get_prize_for_rank(rank: int, player):
 
 
 
-# -----------------------------------------------------------
-# DATA CLASSES
-# -----------------------------------------------------------
-
 @dataclass
 class Player:
     id: int
@@ -438,26 +417,22 @@ def update_confidence(players: List[Player]):
     for idx, p in enumerate(ranked):
         percentile = idx / total
 
-        # --- Natural decay (VERY important) ---
         p.confidence *= 0.9
 
-        # --- Confidence gains ---
-        if percentile < 0.05:          # top 5%
+        if percentile < 0.05:
             p.confidence += 0.05
-        elif percentile < 0.15:        # top 15%
+        elif percentile < 0.15:
             p.confidence += 0.03
-        elif percentile < 0.30:        # top 30%
+        elif percentile < 0.30:
             p.confidence += 0.015
 
-        # --- Confidence losses ---
-        elif percentile > 0.95:        # bottom 5%
+        elif percentile > 0.95:
             p.confidence -= 0.06
-        elif percentile > 0.85:        # bottom 15%
+        elif percentile > 0.85:
             p.confidence -= 0.035
-        elif percentile > 0.70:        # bottom 30%
+        elif percentile > 0.70:
             p.confidence -= 0.02
 
-        # Clamp
         p.confidence = max(-1.0, min(1.0, p.confidence))
         
 
@@ -525,10 +500,7 @@ def init_season_players(players):
                 "earnings": 0
             }
                 
-# -----------------------------------------------------------
-# PLACEMENT POINTS
-# -----------------------------------------------------------
-
+                
 def placement_points(placement: int) -> int:
     if placement > 50:
         return 0
@@ -544,10 +516,6 @@ def placement_points(placement: int) -> int:
         return 60
     return 0
 
-
-# -----------------------------------------------------------
-# POI GENERATION
-# -----------------------------------------------------------
 
 def generate_pois():
     base_names = [
@@ -582,10 +550,6 @@ def generate_pois():
     return pois
 
 
-# -----------------------------------------------------------
-# PLAYER DROPS
-# -----------------------------------------------------------
-
 def assign_drops(players: List[Player], pois: List[POI]):
     drop_list = []
 
@@ -603,10 +567,6 @@ def assign_drops(players: List[Player], pois: List[POI]):
         player.alive = True
 
 
-# -----------------------------------------------------------
-# ARCHETYPE HELPERS
-# -----------------------------------------------------------
-
 def assign_archetypes(players):
     for p in players:
         if p.archetype == "TBD":
@@ -617,21 +577,21 @@ def get_kill_weight(player):
     base = player.skill
     
     multipliers = {
-        "Fragger":    1.30,     # big early/mid game monster
-        "Aggressive": 1.45,     # loves chaos, takes most 50/50s
-        "Strategist": 0.90,     # survives longer, fewer stupid fights
-        "Passive":    0.80,     # really avoids most voluntary fights
+        "Fragger":    1.30,
+        "Aggressive": 1.45,
+        "Strategist": 0.90,
+        "Passive":    0.80, 
     }
     
     return base * multipliers.get(player.archetype, 1.0)
 
 
-def get_survival_weight(player):  # opposite direction
+def get_survival_weight(player):
     multipliers = {
         "Fragger":    0.85,
-        "Aggressive": 0.75,     # dies more often in chaotic fights
-        "Strategist": 1.25,     # best at surviving to endgame
-        "Passive":    1.40,     # very hard to kill if they don't want to fight
+        "Aggressive": 0.75,
+        "Strategist": 1.25,
+        "Passive":    1.40,
     }
     return 1.0 * multipliers.get(player.archetype, 1.0)
 
@@ -750,9 +710,7 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Gets the monkey off their back.",
             ]
 
-    # --------------------------------------------------
-    # BACK-TO-BACK WINS
-    # --------------------------------------------------
+
     elif wins >= 2 and prev_wins == wins - 1:
 
         if wins == 2:
@@ -788,9 +746,6 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "This is historic-level dominance."
             ]
 
-    # --------------------------------------------------
-    # NON-CONSECUTIVE WINS
-    # --------------------------------------------------
     else:
 
         if match_number == total_matches:
@@ -853,18 +808,18 @@ def update_tournament_context(players: List[Player]):
 def update_player_strategy(player: Player, match_number: int):
     pressure = match_number / CONFIG["matches"]
 
-    # Base risk
+
     risk = 0.4
 
-    # Losing? Take risks
+
     if player.points_to_first > 40:
         risk += 0.2
 
-    # Almost winning? FULL SEND
+
     if 0 < player.points_to_first <= 30:
         risk += 0.35
 
-    # Safe from below? Can grief freely
+
     if player.safety_margin >= 60:
         player.grief_bias = 0.7
         risk += 0.15
@@ -874,7 +829,7 @@ def update_player_strategy(player: Player, match_number: int):
     else:
         player.grief_bias = 0.3
 
-    # Endgame pressure
+
     risk += pressure * 0.25
 
     player.risk_tolerance = max(0.2, min(1.0, risk))
@@ -895,19 +850,18 @@ def choose_target(attacker, players):
     for t in targets:
         w = t.skill
 
-        # Prefer higher ranked players if griefing
+
         if attacker.grief_bias > 0 and t.current_rank < attacker.current_rank:
             w *= (1 + attacker.grief_bias)
 
-        # Rival targeting (repeat beef)
         hatred = attacker.rivals.get(t.id, 0)
         w *= (1 + hatred * 0.25)
 
-        # Fear avoidance (dodging demons)
+
         fear = attacker.fear.get(t.id, 0)
         w *= max(0.4, 1 - fear * 0.15)
 
-        # Avoid pointless low-impact fights
+
         if t.current_rank > 50:
             w *= 0.7
 
@@ -918,15 +872,12 @@ def choose_target(attacker, players):
 
 
 def register_elim(killer: Player, victim: Player):
-    # Killer builds hatred (confidence to target again)
+
     killer.rivals[victim.id] = killer.rivals.get(victim.id, 0) + 1
 
-    # Victim builds fear (avoidance)
+
     victim.fear[killer.id] = victim.fear.get(killer.id, 0) + 1
 
-# -----------------------------------------------------------
-# MATCH SIMULATION
-# -----------------------------------------------------------
 
 def simulate_match(players: List[Player], match_number: int):
     update_tournament_context(players)
@@ -934,7 +885,7 @@ def simulate_match(players: List[Player], match_number: int):
     for p in players:
         update_player_strategy(p, match_number)
 
-    # Mod: match start
+
     for mod in ACTIVE_MODS:
         if mod.enabled:
             mod.on_match_start(players, match_number, CONFIG)
@@ -952,7 +903,7 @@ def simulate_match(players: List[Player], match_number: int):
     print(f"Elim Points: {CONFIG['elim_points']}\n")
     sim_sleep(1)
 
-    # Players to watch
+
     top_players = sorted(players, key=lambda p: p.total_points, reverse=True)[:3]
     print("⭐ Players to Watch")
     for p in top_players:
@@ -968,7 +919,6 @@ def simulate_match(players: List[Player], match_number: int):
     print("━" * 50)
     sim_sleep(0.5)
 
-    # POI generation & drops
     pois = generate_pois()
     assign_drops(players, pois)
 
@@ -983,7 +933,7 @@ def simulate_match(players: List[Player], match_number: int):
     print("\n🪂 Players are now landing on the island…")
     sim_sleep(2)
 
-    # ── HANDLE SPAWN-TIME EVENTS (crashes / no-loads) ─────────────────────────
+
     pre_dead_count = 0
     for player in players:
         for mod in ACTIVE_MODS:
@@ -999,7 +949,7 @@ def simulate_match(players: List[Player], match_number: int):
         print(f"\n⚠️  {pre_dead_count} player(s) eliminated before fights began\n")
         sim_sleep(1.2)
 
-    # Current alive players after spawn events
+
     alive = [p for p in players if p.alive]
     current_placement = len(alive)
     placements = {}
@@ -1011,7 +961,7 @@ def simulate_match(players: List[Player], match_number: int):
 
     random.shuffle(alive)
 
-    # ── FIGHT LOGIC ────────────────────────────────────────────────────────────
+
     late_game = match_number >= CONFIG["matches"] - 2
 
     def should_fight(attacker, defender):
@@ -1055,7 +1005,6 @@ def simulate_match(players: List[Player], match_number: int):
         attacker = choose_attacker(alive)
         defender = choose_target(attacker, alive)
 
-        # Safety: skip if somehow dead since last check
         if not attacker.alive or not defender.alive:
             alive = [p for p in alive if p.alive]
             continue
@@ -1112,16 +1061,16 @@ def simulate_match(players: List[Player], match_number: int):
 
     pre_dead_players = [p for p in players if p.id not in placements and not p.alive]
     if pre_dead_players:
-        # Sort: lower skill gets WORSE placement (higher number)
+
         pre_dead_players.sort(key=lambda p: p.skill)
-        next_placement = len(players)  # Start from 100 (worst)
+        next_placement = len(players)
         for p in pre_dead_players:
             placements[p.id] = next_placement
-            next_placement -= 1  # 100, 99, 98...
+            next_placement -= 1
 
         print(f"📊 {len(pre_dead_players)} pre-match eliminations assigned bottom placements")
 
-    # Declare winner
+
     if not alive:
         print("No winner — everyone eliminated before end?")
         return
@@ -1132,9 +1081,9 @@ def simulate_match(players: List[Player], match_number: int):
     if CONFIG["tournament_type"] == "VICTORY_CUP":
         winner.career_victorycup_wins += 1
 
-    # Assign points & update stats
+
     for p in players:
-        placement = placements.get(p.id, len(players))  # fallback to last
+        placement = placements.get(p.id, len(players))
         elim_count = elims.get(p.id, 0)
 
         t_type = CONFIG["tournament_type"]
@@ -1148,7 +1097,7 @@ def simulate_match(players: List[Player], match_number: int):
     winner.previous_wins = winner.wins
     commentary = get_victory_commentary(winner, match_number, CONFIG["matches"])
 
-    # Victory Royale broadcast
+
     print("\n" + "━" * 50)
     print(f"🟩🟩🟩 #1 VICTORY ROYALE - GAME {match_number} 🟩🟩🟩")
     print("━" * 50)
@@ -1175,14 +1124,11 @@ def simulate_match(players: List[Player], match_number: int):
     print("━" * 40)
     sim_sleep(1)
 
-# -----------------------------------------------------------
-# TOURNAMENT SIMULATION
-# -----------------------------------------------------------
 
 def simulate_tournament():
     players = []
 
-    # Add pro players
+
     for i, (name, skill, arch, org) in enumerate(pro_players_skills):
         players.append(Player(
             id=i,
@@ -1192,7 +1138,7 @@ def simulate_tournament():
             org=org
         ))
 
-    # Fill remaining slots with filler players
+
     for i in range(len(pro_players_skills), CONFIG["players"]):
         players.append(Player(
             id=i,
@@ -1200,17 +1146,16 @@ def simulate_tournament():
             skill=random.randint(1, 75)
         ))
 
-    # Assign archetypes to any TBD
     assign_archetypes(players)
 
-    # 🔹 LOAD CAREER STATS
+
     load_career_data(players)
 
-    # Run all matches
+
     for match_number in range(1, CONFIG["matches"] + 1):
         simulate_match(players, match_number)
 
-    # 🔹 UPDATE & SAVE CAREER STATS
+
     update_careers(players)
     save_career_data(players)
     init_season_players(players)
@@ -1219,10 +1164,6 @@ def simulate_tournament():
         end_season()
 
     return players
-
-# -----------------------------------------------------------
-# LEADERBOARD & HISTORY
-# -----------------------------------------------------------
 
 def sort_leaderboard(players: List[Player]):
     players.sort(
@@ -1316,7 +1257,7 @@ def show_org_page(org_name, players):
     total_players = len(org_players)
     earnings_per_player = total_earnings / total_players if total_players else 0
 
-    # Consistency = average placement across all matches
+
     all_placements = []
     for p in org_players:
         all_placements.extend(p.placements)
@@ -1354,7 +1295,7 @@ def show_player_history(players: List[Player]):
         if user_input.lower() == 'q':
             break
 
-        # ---- Career leaderboard ----
+
         if user_input.lower() == "career":
             career_players = [p for p in sorted_players if hasattr(p, "career_earnings")]
             if not career_players:
@@ -1395,7 +1336,7 @@ def show_player_history(players: List[Player]):
             print("━"*60)
             continue
 
-        # ---- Single player lookup (rank or name) ----
+
         player = None
         if user_input.isdigit():
             rank = int(user_input)
@@ -1426,7 +1367,7 @@ def show_player_history(players: List[Player]):
                     continue
                 player = matches[int(choice)-1]
 
-        # ---- Show player's match history ----
+
         rank = sorted_players.index(player) + 1
         print(f"\n{player.name}")
         print(f"{player.org}")
@@ -1440,7 +1381,7 @@ def show_player_history(players: List[Player]):
             print(f"{idx:<8}{placement:<12}{kills}")
         print("━"*30)
 
-        # ---- Career stats (if available) ----
+
         if hasattr(player, "career_earnings"):
             print(f"\n🏅 Career Stats for {player.name}")
             print(f"Total Tournament Wins: {player.career_wins}")
@@ -1463,9 +1404,6 @@ def show_player_history(players: List[Player]):
             print(f"Season Earnings: ${s['earnings']:,}")
 
 
-# -----------------------------------------------------------
-# EXPORT TO TXT
-# -----------------------------------------------------------
 def export_tournament_results(players: List[Player], matches: int):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"tournament_{timestamp}.txt"
@@ -1499,7 +1437,7 @@ def export_tournament_results(players: List[Player], matches: int):
 
     print(f"Tournament results exported to {filename}")
     
-#pre-tournament menu helper function
+
 def cycle_tournament_type():
     keys = list(TOURNAMENT_TYPES.keys())
     current = CONFIG["tournament_type"]
@@ -1585,7 +1523,6 @@ def main_menu():
             tournament_template_menu()
 
         elif choice == "5":
-            # Mods & Extras menu
             while True:
                 print("\n" + "━" * 45)
                 print("🎮 MODS & EXTRAS")
@@ -1655,7 +1592,7 @@ def show_patch_notes():
     print("──────────────────────────────────────")
     print("• Fixed bug where crashed/no-loaded players would receive high placements")
     print("• Added new splash texts")
-    print("• Org roster changes:")
+    print("• Added new splash texts")
     print("  - Kami left Al Qadsiah")
     print("  - Charyy left RVL")
     print("  - Flickzy left Aight")
@@ -1766,10 +1703,6 @@ def pre_tournament_menu():
 
 
 
-
-# -----------------------------------------------------------
-# MAIN
-# -----------------------------------------------------------
 if __name__ == "__main__":
     action = main_menu()
 
