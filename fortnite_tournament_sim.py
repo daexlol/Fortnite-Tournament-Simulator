@@ -17,6 +17,7 @@ class Colors:
     RESET = "\033[0m"
     BOLD = "\033[1m"
     DIM = "\033[2m"
+    ITALIC = "\033[3m"
     
     # Softer, pastel tones (light & muted)
     SOFT_RED     = "\033[38;2;255;102;102m"    # light coral
@@ -27,7 +28,7 @@ class Colors:
     SOFT_CYAN    = "\033[38;2;102;204;204m"    # light turquoise
     
     # Very light neutrals for backgrounds/accents (subtle)
-    LIGHT_GRAY   = "\033[38;2;160;160;160m"
+    LIGHT_GRAY   = "\033[38;2;150;150;150m"
     VERY_LIGHT_GRAY = "\033[38;2;230;230;235m"
     WARM_WHITE   = "\033[38;2;245;245;240m"
     
@@ -81,7 +82,7 @@ CONFIG = {
     "speed": "NORMAL", # SLOW | NORMAL | FAST | INSTANT
     "random_seed": random.randint(1,1000),
     "tournament_type": "FNCS", # CASH CUP | FNCS | LAN EVENT | VICTORY CUP
-    "version": "1.1.0",
+    "version": "1.1.1",
     "build": "Stable", # or "Experimental"
 }
 
@@ -115,13 +116,13 @@ pro_players_skills = [
     ("Shxrk", 107, "Fragger", "BIG"),
     ("Scroll", 104, "Strategist", "Atlantic"),
     ("Th0masHD", 103, "Strategist", "Free Agent"),
-    ("Kami", 109, "Passive", "Al Qadsiah"),
+    ("Kami", 109, "Passive", "Free Agent"),
     ("Chico", 101, "Strategist", "Free Agent"),
-    ("Charyy", 100, "Passive", "RVL"),
+    ("Charyy", 100, "Passive", "Free Agent"),
     ("Japko", 104, "Fragger", "Falcons"),
     ("Queasy", 103, "Passive", "Free Agent"),
     ("Veno", 102, "Fragger", "XSET"),
-    ("Flickzy", 101, "Aggressive", "Aight"),
+    ("Flickzy", 101, "Aggressive", "Free Agent"),
     ("P1ngfnz", 100, "Fragger", "Free Agent"),
     ("Malibuca", 104, "Strategist", "Free Agent"),
     ("Vanyak3k", 103, "Passive", "Gentle Mates"),
@@ -991,7 +992,7 @@ def simulate_match(players: List[Player], match_number: int):
                 if result in ("NO_LOAD", "CRASH"):
                     pre_dead_count += 1
                     reason = "didn't load in" if result == "NO_LOAD" else "crashed"
-                    print(f"{'❌' if result == 'NO_LOAD' else '💥'} {display_name(player)} {reason}!")
+                    print(f"{'❌' if result == 'NO_LOAD' else '💥'} {Colors.SOFT_RED}{display_name(player)} {reason}! {Colors.RESET}")
                     player.alive = False
 
     if pre_dead_count > 0:
@@ -1109,14 +1110,16 @@ def simulate_match(players: List[Player], match_number: int):
 
         sim_sleep(0.25)
 
-    # Handle any remaining pre-dead players (should be very rare now)
     pre_dead_players = [p for p in players if p.id not in placements and not p.alive]
     if pre_dead_players:
-        pre_dead_players.sort(key=lambda p: p.skill, reverse=True)
-        next_placement = len(alive) + 1
+        # Sort: lower skill gets WORSE placement (higher number)
+        pre_dead_players.sort(key=lambda p: p.skill)
+        next_placement = len(players)  # Start from 100 (worst)
         for p in pre_dead_players:
             placements[p.id] = next_placement
-            next_placement += 1
+            next_placement -= 1  # 100, 99, 98...
+
+        print(f"📊 {len(pre_dead_players)} pre-match eliminations assigned bottom placements")
 
     # Declare winner
     if not alive:
@@ -1552,7 +1555,7 @@ def main_menu():
         print(f"🏟️ FORTNITE TOURNAMENT SIM v{CONFIG['version']} ({CONFIG['build']})")   
         print("━" * 50)
         splash = random.choice(load_splash_texts())
-        print(Colors.SOFT_PURPLE + splash + Colors.RESET)  
+        print(Colors.SOFT_PURPLE + Colors.ITALIC + splash + Colors.RESET)  
         print(f"\n📆 SEASON {SEASON['current_season']}")
         print(f"Tournaments Played: {SEASON['tournaments_played']} / {SEASON['tournaments_per_season']}")
         
@@ -1646,6 +1649,16 @@ def show_patch_notes():
     print("📜  PATCH NOTES  –  Fortnite Tournament Simulator")
     print("═" * 60)
     print("Last updated: January 10, 2026")
+    print("")
+    
+    print("v1.1.1 Hotfix (January 10, 2026)")
+    print("──────────────────────────────────────")
+    print("• Fixed bug where crashed/no-loaded players would receive high placements")
+    print("• Added new splash texts")
+    print("• Org roster changes:")
+    print("  - Kami left Al Qadsiah")
+    print("  - Charyy left RVL")
+    print("  - Flickzy left Aight")
     print("")
     
     print("v1.1.0 – Mods Update (January 9, 2026)")
