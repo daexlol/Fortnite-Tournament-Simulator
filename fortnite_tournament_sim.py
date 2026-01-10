@@ -1648,7 +1648,7 @@ def show_patch_notes():
     print("Last updated: January 10, 2026")
     print("")
     
-    print("v1.1 – Mods Update (January 9, 2026)")
+    print("v1.1.0 – Mods Update (January 9, 2026)")
     print("──────────────────────────────────────")
     print("• Complete mod system with toggle menu & descriptions")
     print("• New mods added:")
@@ -1662,7 +1662,7 @@ def show_patch_notes():
     print("• Better broadcast feel with new spawn summaries")
     print("")
     
-    print("v1.0 – Initial Release (December 2025)")
+    print("v1.0.0 – Initial Release (December 2025)")
     print("──────────────────────────────────────")
     print("• Full tournament simulation (FNCS, Cash Cup, LAN, Victory Cup)")
     print("• Career stats, season tracking & history")
