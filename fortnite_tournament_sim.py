@@ -5,38 +5,21 @@ import time
 import datetime
 from dataclasses import dataclass, field
 from typing import List
-from utils import display_name, ORG_TAGS
+from utils import display_name, ORG_TAGS, Colors, sim_sleep, CONFIG
 from mods import (
     TechnicalIssuesMod,
+    RageQuitMod,
     ZeroBuildFlashbackMod,
     StreamSnipedMod,
     PingDiffMod
 )
 
-class Colors:
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    DIM = "\033[2m"
-    ITALIC = "\033[3m"
-    
-    SOFT_RED     = "\033[38;2;255;102;102m"
-    SOFT_GREEN   = "\033[38;2;102;204;102m"
-    SOFT_YELLOW  = "\033[38;2;255;204;102m"
-    SOFT_BLUE    = "\033[38;2;102;153;255m"
-    SOFT_PURPLE  = "\033[38;2;204;153;255m"
-    SOFT_CYAN    = "\033[38;2;102;204;204m"
-    
-    LIGHT_GRAY   = "\033[38;2;150;150;150m"
-    VERY_LIGHT_GRAY = "\033[38;2;230;230;235m"
-    WARM_WHITE   = "\033[38;2;245;245;240m"
-    
-    BORDER_BLUE  = "\033[38;2;150;180;220m"
-
 ACTIVE_MODS = [
     TechnicalIssuesMod(crash_chance=0.008, no_load_chance=0.012),
+    RageQuitMod(),
     ZeroBuildFlashbackMod(),
     StreamSnipedMod(),
-    PingDiffMod(bad_ping_chance=0.22),
+    #PingDiffMod(bad_ping_chance=0.22),
 ]
 
 CAREER_FILE = "career_stats.json"
@@ -64,35 +47,9 @@ def load_splash_texts():
 # CONFIGURATION
 # -----------------------------------------------------------
 
-CONFIG = {
-    "players": 100,
-    "matches": 12,
-    "elim_points": 3,
-    "poi_count": 13,
-    "min_poi_size": 1,
-    "max_poi_size": 3,
-    "storm_circles": 12,
-    "allow_griefing": True,
-    "speed": "NORMAL", # SLOW | NORMAL | FAST | INSTANT
-    "random_seed": random.randint(1,1000),
-    "tournament_type": "FNCS", # CASH CUP | FNCS | LAN EVENT | VICTORY CUP
-    "version": "1.1.1",
-    "build": "Stable", # or "Experimental"
-}
 
 
 random.seed(CONFIG["random_seed"])
-
-def sim_sleep(seconds):
-    if CONFIG["speed"] == "INSTANT":
-        return
-    elif CONFIG["speed"] == "FAST":
-        time.sleep(seconds * 0.65)
-    elif CONFIG["speed"] == "SLOW":
-        time.sleep(seconds * 1.35)
-    else:  # NORMAL
-        time.sleep(seconds)
-
 
 pro_players_skills = [
     ("Swizzy", 110, "Fragger", "Free Agent"),
@@ -101,8 +58,8 @@ pro_players_skills = [
     ("Wox", 107, "Strategist", "HavoK"),
     ("Pixie", 106, "Fragger", "HavoK"),
     ("MariusCOW", 105, "Aggressive", "Gentle Mates"),
-    ("Tjino", 110, "Aggressive", "HavoK"),
-    ("PabloWingu", 109, "Aggressive", "HavoK"),
+    ("Tjino", 108, "Aggressive", "HavoK"),
+    ("PabloWingu", 108, "Aggressive", "HavoK"),
     ("Chap", 108, "Fragger", "Free Agent"),
     ("Shxrk", 107, "Fragger", "BIG"),
     ("Scroll", 104, "Strategist", "Atlantic"),
@@ -120,33 +77,33 @@ pro_players_skills = [
     ("Fredoxie", 102, "Strategist", "Free Agent"),
     ("MrSavage", 101, "Aggressive", "XSET"),
     ("Sky", 100, "Strategist", "Atlantic"),
-    ("t3eny", 109, "Aggressive", "Free Agent"),
+    ("t3eny", 106, "Aggressive", "Free Agent"),
     ("Trulex", 98, "Strategist", "Free Agent"),
     ("Tayson", 97, "Strategist", "Falcons"),
-    ("IDrop", 96, "Fragger", "HavoK"),
+    ("IDrop", 104, "Fragger", "HavoK"),
     ("Rezon", 95, "Fragger", "Wave"),
     ("Setty", 99, "Passive", "Free Agent"),
     ("Panzer", 98, "Strategist", "Free Agent"),
     ("Vadeal", 87, "Passive", "Wave"),
     ("Focus", 86, "Fragger", "Free Agent"),
-    ("Akiira", 85, "Fragger", "Gentle Mates"),
+    ("Akiira", 95, "Fragger", "Gentle Mates"),
     ("Rax", 84, "Fragger", "Free Agent"),
-    ("Kurama", 89, "Fragger", "Solary"),
-    ("Werex", 88, "Strategist", "Lyost"),
-    ("Seyyto", 87, "Strategist", "Free Agent"),
+    ("Kurama", 99, "Fragger", "Solary"),
+    ("Werex", 98, "Strategist", "Lyost"),
+    ("Seyyto", 94, "Strategist", "Free Agent"),
     ("Kiro", 86, "Strategist", "Free Agent"),
     ("Podasai", 85, "Strategist", "Free Agent"),
     ("Momsy", 89, "Strategist", "Free Agent"),
-    ("Pixx", 88, "Passive", "HavoK"),
-    ("Demus", 87, "Fragger", "Free Agent"),
-    ("Darm", 85, "Fragger", "BIG"),
+    ("Pixx", 90, "Passive", "HavoK"),
+    ("Demus", 92, "Fragger", "Free Agent"),
+    ("Darm", 90, "Fragger", "BIG"),
     ("Sangild", 85, "Strategist", "Free Agent"),
     ("Huty", 84, "Strategist", "The One"),
     ("F1shyX", 83, "Strategist", "Free Agent"),
     ("Mappi", 83, "Strategist", "Free Agent"),
     ("Moneymaker", 82, "Fragger", "Free Agent"),
     ("Mongraal", 81, "Aggressive", "Free Agent"),
-    ("Wheat", 80, "Strategist", "Free Agent"),
+    ("Wheat", 80, "Strategist", "FLC"),
     ("NeFrizi", 79, "Strategist", "Detect"),
     ("Twi", 78, "Aggressive", "Free Agent"),
     ("SkyJump", 77, "Fragger", "Solary"),
@@ -193,7 +150,7 @@ pro_players_skills = [
     ("Asa", 80, "Passive", "Free Agent"),
     ("Belusi", 79, "Fragger", "Free Agent"),
     ("Refsgaard", 78, "Strategist", "Free Agent"),
-    ("Nxthan", 77, "Fragger", "HavoK"),
+    ("Nxthan", 77, "Fragger", "Free Agent"),
     ("Juu", 76, "Strategist", "FataL"),
 ]
 
@@ -372,6 +329,8 @@ class Player:
     
     rivals: dict = field(default_factory=dict)
     fear: dict = field(default_factory=dict)
+    
+    _has_rage_quit: bool = field(default=False)
 
 
     def add_match_result(self, placement, elims, points):
@@ -885,7 +844,6 @@ def simulate_match(players: List[Player], match_number: int):
     for p in players:
         update_player_strategy(p, match_number)
 
-
     for mod in ACTIVE_MODS:
         if mod.enabled:
             mod.on_match_start(players, match_number, CONFIG)
@@ -954,6 +912,21 @@ def simulate_match(players: List[Player], match_number: int):
     current_placement = len(alive)
     placements = {}
     elims = {p.id: 0 for p in players}
+    
+    rage_quitters = [p for p in players if getattr(p, '_has_rage_quit', False)]
+    if rage_quitters:
+        print(f"\n{Colors.SOFT_RED + Colors.BOLD}😤 {len(rage_quitters)} player(s) have rage quit and won't play this match!{Colors.RESET}")
+        rage_quitters.sort(key=lambda p: p.skill)
+        next_placement = len(players)
+        for p in rage_quitters:
+            placements[p.id] = next_placement
+            next_placement -= 1
+            p.alive = False
+            elims[p.id] = 0
+        sim_sleep(1.5)   
+        
+    alive = [p for p in players if p.alive]
+    current_placement = len(alive)
 
     if len(alive) <= 1:
         print("Match aborted — no one left alive after spawn events.")
@@ -1116,6 +1089,10 @@ def simulate_match(players: List[Player], match_number: int):
     sim_sleep(1)
     print("━" * 50)
     sim_sleep(1)
+			
+    for mod in ACTIVE_MODS:
+        if mod.enabled and hasattr(mod, 'on_match_end'):
+            mod.on_match_end(players, winner, CONFIG)
 
     update_confidence(players)
     print_top10_cumulative(players)
@@ -1229,11 +1206,28 @@ def end_season():
         "champion": champion,
         "leaderboard": leaderboard[:10]
     })
+    mvp_quotes = [
+        f"{champion} just proved why they're built different.",
+        f"{champion}: 'I didn't hear no bell.'",
+        f"{champion} carrying the lobby like it's solos.",
+        "Talk to the hand, because the leaderboard speaks for itself.",
+        f"{champion} didn't come to play — they came to win.",
+        f"From the shadows to the top. {champion} just did that.",
+        f"{champion} turned doubters into viewers.",
+        "Ice in the veins. Fire in the stats.",
+        f"{champion}: 'They said I couldn't. I said watch me.'",
+        "The crown fits. Always did.",
+        f"{champion} didn't just win — they owned the meta.",
+        "When legends are made, {champion} was taking notes... then wrote the book.",
+        f"{champion} walked so the rest could place 2nd.",
+        f"{champion}: still undefeated in vibes."
+    ]
     print("\n" + "━" * 60)
     print(f"🏁 SEASON {SEASON['current_season']} COMPLETE")
     print("━" * 60)
     print(f"👑 MVP: {champion}")
     print(f"⭐ Earnings: ${stats['earnings']:,} | Points: {stats['points']} | Wins: {stats['wins']} | Elims: {stats['elims']}")
+    print(f"   MVP Quote: {random.choice(mvp_quotes)}")
     print("━" * 60)
     # Reset season
     SEASON["current_season"] += 1
@@ -1585,14 +1579,49 @@ def show_patch_notes():
     print("\n" + "═" * 60)
     print("📜  PATCH NOTES  –  Fortnite Tournament Simulator")
     print("═" * 60)
-    print("Last updated: January 10, 2026")
+    print("Last updated: January 12, 2026")
     print("")
+    
+    print("v1.1.2 - (January 12, 2026)")
+    print("──────────────────────────────────────") 
+    print("✨ New")
+    print("• New mod: Rage Quit")
+    print(" - Players can rage quit and refuse to play the rest of the tournament!")
+    print(" - Occurs after enough bad placements or bad leaderboard placement")
+    print("• New Rage Quit themed splash texts")
+    print("• MVP quotes at the end of the season -- what does the MVP have to say?")
+    print("")
+    print("🔧 Balance & Behaviour Tweaks")
+    print("• Player skill calibration pass:")
+    print(" Adjusted a small number of players' skill based on real, recent solo tournament results.")
+    print(" These changes affect consistency, not guaranteed outcomes.")
+    print(" Noticable adjustments include:")
+    print("  • Akiira (slight increase)")
+    print("  • Kurama (slight increase)")
+    print("  • Werex (slight increase)")
+    print("  • Seyyto (slight increase)")
+    print("  • Pixx (slight increase)")
+    print("  • Darm (slight increase)")
+    print("  • Demus (slight increase)")
+    print("  • IDrop (slight increase)")
+    print("  • t3eny (slight decrease)")  
+    print("")
+    print("🐛 Fixes")
+    print("• Prevented unintended stat carryover between matches")
+    print("• Fixed cases where rage quit players have extra matches added to history")
+    print("")
+    print("🔮 Looking Ahead")
+    print("• Major revamp of fight logic and engagements")
+    print("• Save files and deeper season persistence")
+    print("• Expanded regional player pools")
+    print("")
+    
     
     print("v1.1.1 Hotfix (January 10, 2026)")
     print("──────────────────────────────────────")
     print("• Fixed bug where crashed/no-loaded players would receive high placements")
     print("• Added new splash texts")
-    print("• Added new splash texts")
+    print("• Org roster changes:")
     print("  - Kami left Al Qadsiah")
     print("  - Charyy left RVL")
     print("  - Flickzy left Aight")

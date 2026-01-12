@@ -2,7 +2,7 @@ if __name__ == "__main__":
     raise RuntimeError("mods.py should not be run directly!")
 
 import random
-from utils import display_name
+from utils import display_name, Colors, sim_sleep, CONFIG
 
 class Mod:
     name = "BaseMod"
@@ -41,6 +41,45 @@ class TechnicalIssuesMod(Mod):
             player.alive = False
             return "CRASH"
         return None
+        
+
+class RageQuitMod(Mod):
+    name = "Rage Quit"
+    description = "Players tilt hard and bail on the rest of the tournament"
+
+    def __init__(self, tilt_threshold=5, rage_chance_base=0.08):
+        self.tilt_threshold = tilt_threshold
+        self.rage_chance_base = rage_chance_base
+        self.player_bad_streaks = {}
+
+    def on_match_end(self, players, winner, config):
+        if not self.enabled:
+            return
+
+        leaderboard = sorted(players, key=lambda p: p.total_points, reverse=True)
+        for rank, p in enumerate(leaderboard, 1):
+            badness = 0
+            if rank > len(players) * 0.75:
+                badness += 2
+            if p.total_elims < 1:
+                badness += 2
+            if p.placements and p.placements[-1] > 80:
+                badness += 2
+
+            streak = self.player_bad_streaks.setdefault(p.id, [])
+            streak.append(badness)
+            streak[:] = streak[-7:]
+
+            avg_bad = sum(streak) / len(streak) if streak else 0
+            if avg_bad >= self.tilt_threshold and not getattr(p, '_has_rage_quit', False):
+                chance = min(0.35, self.rage_chance_base * (avg_bad - self.tilt_threshold + 1))
+                if random.random() < chance:
+                    print(f"{Colors.SOFT_RED + Colors.BOLD}😡 {display_name(p)} RAGE QUIT the tournament!{Colors.RESET}")
+                    print(f"   └─ Tilted after {len(streak)} bad games (avg: {avg_bad:.1f})")
+                    sim_sleep(1.5)
+                    p._has_rage_quit = True
+                    
+                    remaining_games = CONFIG["matches"] - len(p.placements)
 
 
 class ZeroBuildFlashbackMod(Mod):
@@ -81,9 +120,7 @@ class PingDiffMod(Mod):
         for p in [attacker, defender]:
             if random.random() < self.bad_ping_chance:
                 if random.random() < 0.5:
-                    print(f"📡 {p.name} is teleporting (bad ping disadvantage)!")
                     p.skill = max(1, p.skill * 0.70)
                 else:
-                    print(f"📡 {p.name} has god-ping this fight!")
                     p.skill = min(200, p.skill * 1.18)
         return True

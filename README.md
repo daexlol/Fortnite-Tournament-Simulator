@@ -31,13 +31,13 @@ This project is a hobby project and is actively evolving.
 * Psychological depth: player archetypes, confidence/tilt, rivals/fear, risk tolerance, grief bias
 * Working mod system (toggle on/off in-game)
 
-&nbsp;  - Technical Issues (crashes/no-loads)
+   - Technical Issues (crashes/no-loads)
 
-&nbsp;  - Ping Difference (teleporting + god-ping moments)
+   - Ping Difference (teleporting + god-ping moments)
 
-&nbsp;  - Zero Build Flashback (no-build panic)
+   - Zero Build Flashback (no-build panic)
 
-&nbsp;  Mods are designed to be easily extendable via mods.py
+   Mods are designed to be easily extendable via mods.py
 
 * Save/load system **(COMING SOON™)**
 
@@ -107,14 +107,4 @@ It's open -- fork it, mod it, break it.
 And that's it! Have a run and let me know what you think.
 
 See you on the Battle Bus 🚎
-
-
-
-
-
-
-
-
-
-
 
