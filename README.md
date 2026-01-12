@@ -14,7 +14,7 @@ It simulates tournaments, seasons, player performances, and unpredictable events
 
 
 
-###### **## Current Version**: v1.1.1 (Mods Update Hotfix - January 2026)
+###### **## Current Version**: v1.1.2 (January 12, 2026)
 
 
 
@@ -107,4 +107,5 @@ It's open -- fork it, mod it, break it.
 And that's it! Have a run and let me know what you think.
 
 See you on the Battle Bus 🚎
+
 
