@@ -1796,6 +1796,7 @@ def main_menu():
                 elif mod_choice == "r":
                     for mod in ACTIVE_MODS:
                         mod.enabled = False
+                        save_active_mods(ACTIVE_MODS)
                     print("All mods have been reset to OFF.")
                     sim_sleep(1)
                     
