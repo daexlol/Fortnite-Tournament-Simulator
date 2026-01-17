@@ -1,5 +1,6 @@
 import json
 import os
+import math
 import random
 import time
 import datetime
@@ -11,7 +12,7 @@ from mods import (
     RageQuitMod,
     ZeroBuildFlashbackMod,
     StreamSnipedMod,
-    PingDiffMod
+    PingDiffMod,
 )
 
 ACTIVE_MODS = [
@@ -22,16 +23,19 @@ ACTIVE_MODS = [
     #PingDiffMod(bad_ping_chance=0.22),
 ]
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TOURNAMENTS_ROOT = os.path.join(BASE_DIR, "tournaments")
 CAREER_FILE = "career_stats.json"
 SEASON_FILE = "season_data.json"
 SPLASH_FILE = "splash.txt"
 SEASON = {
     "current_season": 1,
     "tournaments_played": 0,
-    "tournaments_per_season": 12,
+    "tournaments_per_season": 16,
     "season_players": {},
-    "history": []
+    "history": [],
 }
+
 
 def load_splash_texts():
     try:
@@ -95,8 +99,8 @@ pro_players_skills = [
     ("Podasai", 85, "Strategist", "Free Agent"),
     ("Momsy", 89, "Strategist", "Free Agent"),
     ("Pixx", 90, "Passive", "HavoK"),
-    ("Demus", 92, "Fragger", "Free Agent"),
-    ("Darm", 90, "Fragger", "BIG"),
+    ("Demus", 92, "Fragger", "T1"),
+    ("Darm", 90, "Fragger", "T1"),
     ("Sangild", 85, "Strategist", "Free Agent"),
     ("Huty", 84, "Strategist", "The One"),
     ("F1shyX", 83, "Strategist", "Free Agent"),
@@ -108,10 +112,10 @@ pro_players_skills = [
     ("Twi", 78, "Aggressive", "Free Agent"),
     ("SkyJump", 77, "Fragger", "Solary"),
     ("Mikson", 76, "Fragger", "Free Agent"),
-    ("Upl", 75, "Fragger", "Free Agent"),
-    ("Kombek", 74, "Fragger", "Free Agent"),
-    ("Blacha", 73, "Passive", "Free Agent"),
-    ("Hris", 72, "Fragger", "Free Agent"),
+    ("Upl", 80, "Fragger", "Free Agent"),
+    ("Kombek", 79, "Fragger", "Free Agent"),
+    ("Blacha", 78, "Passive", "Free Agent"),
+    ("Hris", 77, "Fragger", "Free Agent"),
     ("Ankido", 71, "Strategist", "BIG"),
     ("Cringe", 70, "Strategist", "AVE"),
     ("Volko", 69, "Strategist", "BIG"),
@@ -229,7 +233,7 @@ TOURNAMENT_TEMPLATES = {
         "matches": 6,
         "storm_circles": 12,
         "elim_points": 2,
-        "tournament_type": "CASH_CUP"
+        "tournament_type": "CASH_CUP",
     },
     "FNCS": {
         "label": "FNCS GRAND FINALS",
@@ -237,7 +241,7 @@ TOURNAMENT_TEMPLATES = {
         "matches": 12,
         "storm_circles": 12,
         "elim_points": 3,
-        "tournament_type": "FNCS"
+        "tournament_type": "FNCS",
     },
     "LAN": {
         "label": "LAN EVENT",
@@ -245,7 +249,7 @@ TOURNAMENT_TEMPLATES = {
         "matches": 12,
         "storm_circles": 12,
         "elim_points": 4,
-        "tournament_type": "LAN"
+        "tournament_type": "LAN",
     },
     "VICTORY_CUP": {
         "label": "VICTORY CUP",
@@ -253,7 +257,7 @@ TOURNAMENT_TEMPLATES = {
         "matches": 4,
         "storm_circles": 12,
         "elim_points": 0,
-        "tournament_type": "VICTORY_CUP"
+        "tournament_type": "VICTORY_CUP",
     }
 }
 
@@ -558,13 +562,14 @@ def get_survival_weight(player):
 # DYNAMIC TOP 10
 # -----------------------------------------------------------
 
-previous_top10 = []
-
+previous_player_ranks = {}
 
 def print_top10_cumulative(players: List[Player]):
-    global previous_top10
+    global previous_player_ranks
+    JUMP_FIRE = 10
+    JUMP_ROCKET = 20
 
-    top10_cumulative = sorted(
+    full_ranking = sorted(
         players,
         key=lambda p: (
             p.total_points,
@@ -573,30 +578,34 @@ def print_top10_cumulative(players: List[Player]):
             -p.average_placement
         ),
         reverse=True
-    )[:10]
+    )
+
+    top10_cumulative = full_ranking[:10]
 
     print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("📊 CURRENT TOP 10 STANDINGS 📊")
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     for rank, p in enumerate(top10_cumulative, 1):
-        # Determine previous rank movement
-        prev_rank = None
-        for idx, prev_p in enumerate(previous_top10, 1):
-            if prev_p.name == p.name:
-                prev_rank = idx
-                break
+        prev_rank = previous_player_ranks.get(p.name)
 
         if prev_rank is None:
             movement = "🆕"
         elif prev_rank > rank:
             diff = prev_rank - rank
-            movement = f"{Colors.SOFT_GREEN}↑{diff}{Colors.RESET}"
+            if diff >= JUMP_ROCKET:
+                flair = " 🚀"
+            elif diff >= JUMP_FIRE:
+                flair = " 🔥"
+            else:
+                flair = ""
+				
+            movement = f"{Colors.SOFT_GREEN}▲{diff}{flair}{Colors.RESET}"
         elif prev_rank < rank:
             diff = rank - prev_rank
-            movement = f"{Colors.SOFT_RED}↓{diff}{Colors.RESET}"
+            movement = f"{Colors.SOFT_RED}▼{diff}{Colors.RESET}"
         else:
-            movement = f"{Colors.LIGHT_GRAY}→{Colors.RESET}"
+            movement = f"{Colors.LIGHT_GRAY}—0{Colors.RESET}"
 
         # Top 3 medals
         if rank == 1:
@@ -608,31 +617,75 @@ def print_top10_cumulative(players: List[Player]):
         else:
             medal = f"{rank:>2}."
 
-        # Points bar (scaled, max width 20)
         bar_length = min(10, p.total_points // 50)
-        points_bar = "█" * bar_length
+        points_bar = "█" * bar_length + "░" * (10 - bar_length)
 
         print(
             f"{medal} {p.name:<15} | Points: {p.total_points:<4} [{points_bar:<10}] "
             f"| Elims: {p.total_elims:<2} 🗡️ | Wins: {p.wins:<2} ⭐ | {movement}"
         )
 
-    previous_top10 = top10_cumulative.copy()
+    previous_player_ranks = {p.name: idx + 1 for idx, p in enumerate(full_ranking)}
+
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━")
     sim_sleep(2)
+
+
+def print_tournament_win_ticker(players, current_match, total_matches):
+    remaining = total_matches - current_match
+    if remaining <= 0 or not players:
+        return
+
+    projections = []
+    
+    for p in players:
+        if not p.placements:
+            continue
+        games_played = len(p.placements)
+        avg_place_pts = placement_points(sum(p.placements) / games_played)
+        avg_elim_pts = (p.total_elims / games_played) * CONFIG["elim_points"]
+        expected_gain = (avg_place_pts + avg_elim_pts) * remaining
+        
+        conf_boost = p.confidence * 0.15 * remaining * CONFIG["elim_points"]
+        projected = p.total_points + expected_gain + conf_boost
+
+
+        projections.append((projected, p.total_points, p.wins, p))
+
+    if not projections:
+        return
+
+    scale = max(1, sum(p.total_points for _, ppts, _, p in projections) / len(projections) / 2)
+
+    exp_scores = [math.exp(proj / scale) for proj, _, _, _ in projections]
+    total_exp = sum(exp_scores)
+
+    print("\n━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    print(f"WIN % TICKER – GAME {current_match}/{total_matches} (Remaining: {remaining})")
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    
+    # Sort by projected points
+    projections.sort(key=lambda x: x[0], reverse=True)
+
+    for i, (proj_pts, curr_pts, wins, p) in enumerate(projections[:6]):
+        chance = (math.exp(proj_pts / scale) / total_exp) * 100
+        chance = max(0.5, min(99.5, chance))
+        
+        bar_len = int(chance / 12.5)
+        bar = "█" * bar_len + "░" * (8 - bar_len)
+        
+        print(f"{i+1:>2}. {display_name(p):<15} {chance:>5.1f}% [{bar}] ({curr_pts} pts)")
+    
+    print("━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    sim_sleep(1.5)
 
 
 def get_victory_commentary(winner, match_number: int, total_matches: int):
     wins = winner.wins
     prev_wins = getattr(winner, "previous_wins", wins - 1)
+    name = winner.name
 
-    commentary = []
-
-    # --------------------------------------------------
-    # FIRST EVER WIN
-    # --------------------------------------------------
     if wins == 1:
-
         if match_number == 1:
             commentary = [
                 "Opens the tournament with a massive statement.",
@@ -643,9 +696,12 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "That is how you announce yourself.",
                 "What a way to start the tournament.",
                 "Opens the tournament with a statement win.",
-                f"Coming in hot! {winner.name} steals a win in the first game.",
+                f"Coming in hot! {name} steals a win in the first game.",
+                f"{name} just put the lobby on notice!",
+                "They came, they dropped, they dominated.",
+                f"First blood? Nah, first ROYALE. {name} is cooking!",
+                f"{name} sending a dangerous message in the first game.",
             ]
-
         elif match_number == total_matches:
             commentary = [
                 "Leaves it until the final game — and delivers.",
@@ -656,8 +712,10 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Ice in the veins — unbelievable timing.",
                 "Leaves it late — but still gets it done.",
                 "First win, last chance. Ice cold.",
+                "Pressure makes diamonds, and it sure did here.",
+                "Saved it for the final game — ice cold!",
+                "They didn’t just win — they closed the chapter.",
             ]
-
         else:
             commentary = [
                 "Finally breaks through with their first win.",
@@ -667,11 +725,10 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "That win was overdue.",
                 "Momentum might just be shifting.",
                 "Gets the monkey off their back.",
+                "A win like that gets them back in action.",
             ]
 
-
     elif wins >= 2 and prev_wins == wins - 1:
-
         if wins == 2:
             commentary = [
                 "Back-to-back wins to start the tournament.",
@@ -682,8 +739,8 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "The rest of the lobby is already chasing.",
                 "Wins the first two games — unreal pace.",
                 "Nobody is slowing them down right now.",
+                f"Back-to-back! {name} is on FIRE!",
             ]
-
         elif wins == 3:
             commentary = [
                 "That’s three wins in a row.",
@@ -694,19 +751,20 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Pure dominance from start to finish.",
                 "This is turning into a solo highlight reel.",
             ]
-
-        else:  # 4+ win streak
+        else:
             commentary = [
                 f"{wins} wins in a row — this is unreal.",
                 "This is turning into a solo highlight reel.",
                 "The lobby belongs to them right now.",
                 "Every fight feels unfair.",
                 "They are dictating the entire tournament.",
-                "This is historic-level dominance."
+                "This is historic-level dominance.",
+                f"{wins} in a row — the rest of the lobby is just renting space.",
+                "They’re not winning matches — they’re collecting trophies.",
+                "Unreal pace. Somebody get this man a cooldown.",
             ]
 
     else:
-
         if match_number == total_matches:
             commentary = [
                 "Closes out the tournament with a huge win.",
@@ -714,9 +772,12 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "That’s a perfect way to finish.",
                 "Final game, final statement.",
                 "They saved something special for the end.",
-                "That win will be remembered."
+                "That win will be remembered.",
+                "Pressure makes diamonds, and it sure did here.",
+                "When it mattered most... they SHOWED UP.",
+                "Clutch factor through the roof. Legendary.",
+                "Last game, last royale. Storybook finish.",
             ]
-
         else:
             commentary = [
                 f"That’s win number {wins} of the tournament.",
@@ -724,8 +785,20 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Another crucial Victory Royale.",
                 "They stay right in the mix.",
                 "That win could be massive for the standings.",
-                "Consistency like this wins tournaments."
+                "Consistency like this wins tournaments.",
             ]
+
+    if random.random() < 0.25:
+        banter = [
+            "Casters are out of breath just watching this.",
+            "The lobby is shook. I’m shook.",
+            "That was not in the script. Holy...",
+            "I need to see the VOD — that was insane.",
+            "Somebody clip that. Right now.",
+            "I’m not crying, YOU’RE crying.",
+            "This is why we watch comp Fortnite.",
+        ]
+        return f"{random.choice(commentary)} {random.choice(banter)}"
 
     return random.choice(commentary)
 
@@ -1096,9 +1169,30 @@ def simulate_match(players: List[Player], match_number: int):
 
     update_confidence(players)
     print_top10_cumulative(players)
+    
+    if CONFIG.get("show_win_tickers", True):
+        halfway_game = CONFIG["matches"] // 2
+        before_final_game = CONFIG["matches"] - 1
+
+        if match_number == halfway_game or match_number == before_final_game:
+            if match_number == halfway_game:
+                print("\n🎙️ Caster: Let's check the odds before the second half of the tournament...")
+                sim_sleep(2)
+                print("\n" + "─" * 50 )
+                print("HALFTIME UPDATE – WIN % TICKER")
+            else:
+                print("\n🎙️ Caster: Quick odds check before the final drop...")
+                sim_sleep(2)
+                print("\n" + "─" * 50 )
+                print("FINAL GAME SETUP – WIN % TICKER")
+            print("─" * 50)
+    
+            print_tournament_win_ticker(players, match_number, CONFIG["matches"])
+    
+        sim_sleep(1.2)
     sim_sleep(1)
-    print(f"Match {match_number} complete! ✅")
-    print("━" * 40)
+    print(f"\nMatch {match_number} complete! ✅")
+    print("·" * 40)
     sim_sleep(1)
 
 
@@ -1218,7 +1312,7 @@ def end_season():
         f"{champion}: 'They said I couldn't. I said watch me.'",
         "The crown fits. Always did.",
         f"{champion} didn't just win — they owned the meta.",
-        "When legends are made, {champion} was taking notes... then wrote the book.",
+        f"When legends are made, {champion} was taking notes... then wrote the book.",
         f"{champion} walked so the rest could place 2nd.",
         f"{champion}: still undefeated in vibes."
     ]
@@ -1284,13 +1378,16 @@ def show_player_history(players: List[Player]):
     sorted_players = sort_leaderboard(players)
     while True:
         user_input = input(
-            "\nEnter a placement number, player name, org name, or 'career' for career leaderboard, or 'q' to quit: "
-        )
-        if user_input.lower() == 'q':
+            "\nEnter a placement number, player name, org name, "
+            "or 'career' for career leaderboard, "
+            "or 'season' for current season leaderboard, "
+            "or 'q' to quit: "
+        ).strip().lower()
+
+        if user_input == 'q':
             break
 
-
-        if user_input.lower() == "career":
+        if user_input == "career":
             career_players = [p for p in sorted_players if hasattr(p, "career_earnings")]
             if not career_players:
                 print("No career data available yet.")
@@ -1330,6 +1427,36 @@ def show_player_history(players: List[Player]):
             print("━"*60)
             continue
 
+        elif user_input == "season":
+            if not SEASON["season_players"]:
+                print("No season data yet — play some tournaments!")
+                continue
+
+            season_players = []
+            for name, stats in SEASON["season_players"].items():
+                player = next((p for p in sorted_players if p.name == name), None)
+                if player:
+                    season_players.append((player, stats))
+                else:
+                    season_players.append((Player(name=name), stats))
+                    
+            sort_option = input("Sort by (earnings/points/wins/elims): ").lower()
+            if sort_option == "points":
+                season_players.sort(key=lambda x: x[1]["points"], reverse=True)
+            elif sort_option == "wins":
+                season_players.sort(key=lambda x: x[1]["wins"], reverse=True)
+            elif sort_option == "elims":
+                season_players.sort(key=lambda x: x[1]["elims"], reverse=True)
+            else:
+                season_players.sort(key=lambda x: x[1]["earnings"], reverse=True)
+
+
+            print(f"\n{'Rank':<6}{'Player':<15}{'Points':<8}{'Wins':<6}{'Elims':<8}{'Earnings'}")
+            print("━"*60)
+            for rank, (p, stats) in enumerate(season_players, 1):
+                print(f"{rank:<6}{p.name:<16}{stats['points']:<8}{stats['wins']:<6}{stats['elims']:<8}${stats['earnings']:,}")
+            print("━"*60)
+            continue
 
         player = None
         if user_input.isdigit():
@@ -1341,11 +1468,11 @@ def show_player_history(players: List[Player]):
                 continue
         else:
             org_names = {p.org.lower() for p in sorted_players if p.org != "Free Agent"}
-            if user_input.lower() in org_names:
+            if user_input in org_names:
                 show_org_page(user_input, sorted_players)
                 continue
 
-            matches = [p for p in sorted_players if user_input.lower() in p.name.lower()]
+            matches = [p for p in sorted_players if user_input in p.name.lower()]
             if len(matches) == 0:
                 print(f"No players found matching '{user_input}'.")
                 continue
@@ -1361,76 +1488,114 @@ def show_player_history(players: List[Player]):
                     continue
                 player = matches[int(choice)-1]
 
+        if player:
+            rank = sorted_players.index(player) + 1
+            print(f"\n{player.name}")
+            print(f"{player.org}")
+            print(f"Ranking: #{rank}")
+            print(f"Total Points: {player.total_points}")
+            print(f"Total Kills: {player.total_elims}")
+            print(f"Total Wins: {player.wins}\n")
+            print(f"{'MATCH':<8}{'PLACEMENT':<12}{'KILLS'}")
+            print("━"*30)
+            for idx, (placement, kills) in enumerate(zip(player.placements, player.match_kills), 1):
+                print(f"{idx:<8}{placement:<12}{kills}")
+            print("━"*30)
 
-        rank = sorted_players.index(player) + 1
-        print(f"\n{player.name}")
-        print(f"{player.org}")
-        print(f"Ranking: #{rank}")
-        print(f"Total Points: {player.total_points}")
-        print(f"Total Kills: {player.total_elims}")
-        print(f"Total Wins: {player.wins}\n")
-        print(f"{'MATCH':<8}{'PLACEMENT':<12}{'KILLS'}")
-        print("━"*30)
-        for idx, (placement, kills) in enumerate(zip(player.placements, player.match_kills), 1):
-            print(f"{idx:<8}{placement:<12}{kills}")
-        print("━"*30)
+            if hasattr(player, "career_earnings"):
+                print(f"\n🏅 Career Stats for {player.name}")
+                print(f"Total Tournament Wins: {player.career_wins}")
+                print(f"Total Tournament Wins: {player.career_wins}")
+                print(f"Total Cash Cup Wins: {player.career_cashcup_wins}")
+                print(f"Total Victory Cup Game Wins: {player.career_victorycup_wins}")
+                print(f"Total FNCS Wins: {player.career_fncs_wins}")
+                print(f"Total LAN Wins: {player.career_lan_wins}")
+                print(f"Total Tournaments: {player.career_tournaments}")
+                print(f"Total Kills: {player.career_kills}")
+                print(f"Total Earnings: ${player.career_earnings:,}")
+                print(f"Best Finish: {player.best_finish}")
 
-
-        if hasattr(player, "career_earnings"):
-            print(f"\n🏅 Career Stats for {player.name}")
-            print(f"Total Tournament Wins: {player.career_wins}")
-            print(f"Total Cash Cup Wins: {player.career_cashcup_wins}")
-            print(f"Total Victory Cup Game Wins: {player.career_victorycup_wins}")
-            print(f"Total FNCS Wins: {player.career_fncs_wins}")
-            print(f"Total LAN Wins: {player.career_lan_wins}")
-            print(f"Total Tournaments: {player.career_tournaments}")
-            print(f"Total Kills: {player.career_kills}")
-            print(f"Total Earnings: ${player.career_earnings:,}")
-            print(f"Best Finish: {player.best_finish}")
-            
-        if player.name in SEASON["season_players"]:
-            s = SEASON["season_players"][player.name]
-
-            print(f"\n📆 Season {SEASON['current_season']} Stats")
-            print(f"Season Points: {s['points']}")
-            print(f"Season Wins: {s['wins']}")
-            print(f"Season Elims: {s['elims']}")
-            print(f"Season Earnings: ${s['earnings']:,}")
+            if player.name in SEASON["season_players"]:
+                s = SEASON["season_players"][player.name]
+                print(f"\n📆 Season {SEASON['current_season']} Stats")
+                print(f"Season Points: {s['points']}")
+                print(f"Season Wins: {s['wins']}")
+                print(f"Season Elims: {s['elims']}")
+                print(f"Season Earnings: ${s['earnings']:,}")
 
 
 def export_tournament_results(players: List[Player], matches: int):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"tournament_{timestamp}.txt"
+    t_type = CONFIG["tournament_type"]
+    t_label = TOURNAMENT_TYPES[t_type]["label"]
+    
+    t_type = CONFIG["tournament_type"]
+    t_label = TOURNAMENT_TYPES[t_type]["label"]
 
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(f"Fortnite Tournament Results ({matches} Matches)\n")
-        f.write("="*50+"\n\n")
+    safe_label = t_label.replace(" ", "")
+    tournament_dir = os.path.join(TOURNAMENTS_ROOT, safe_label)
 
-        for match_num in range(1, matches+1):
-            match_winners = [p for p in players if p.placements[match_num-1] == 1]
-            winner_name = match_winners[0].name if match_winners else "Unknown"
-            f.write(f"Game {match_num}: {winner_name} (Winner)\n")
-        t_type = CONFIG["tournament_type"]
-        t_label = TOURNAMENT_TYPES[t_type]["label"]
+    os.makedirs(tournament_dir, exist_ok=True)
 
-        f.write(f"\nFinal Leaderboard ({t_label})\n")
-        f.write("="*50+"\n")
-        f.write(f"{'Rank':<6}{'Player':<15}{'Points':<10}{'Elims':<10}{'Wins':<6}{'Avg Place'}\n")
-        f.write("-"*50+"\n")
 
-        sorted_players = sorted(
-            players,
-            key=lambda p: (p.total_points, p.wins, p.total_elims, -p.average_placement),
-            reverse=True
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"{safe_label}_{timestamp}.txt"
+    filepath = os.path.join(tournament_dir, filename)
+
+
+    sorted_players = sorted(
+        players,
+        key=lambda p: (p.total_points, p.wins, p.total_elims, -p.average_placement),
+        reverse=True
+    )
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("FORTNITE TOURNAMENT SIMULATOR REPORT\n")
+        f.write("═" * 55 + "\n")
+        f.write(f"Tournament Type : {t_label}\n")
+        f.write(f"Matches Played  : {matches}\n")
+        f.write(f"Date            : {timestamp}\n")
+        f.write("═" * 55 + "\n\n")
+
+        f.write("MATCH RESULTS\n")
+        f.write("─" * 55 + "\n")
+        for match_num in range(1, matches + 1):
+            winners = [p for p in players if p.placements[match_num - 1] == 1]
+            winner = winners[0].name if winners else "Unknown"
+            f.write(f"Game {match_num:<2} → {winner} 👑\n")
+        f.write("\n")
+
+        f.write("─" * 55 + "\n")
+        f.write("FINAL LEADERBOARD\n")
+        f.write("─" * 55 + "\n")
+        f.write(
+            f"{'Rank':<6}{'Player':<15}{'Points':<8}"
+            f"{'Elims':<8}{'Wins':<6}{'Avg Place'}\n"
         )
+        f.write("─" * 55 + "\n")
 
         for rank, p in enumerate(sorted_players, 1):
-            f.write(f"{rank:<6}{p.name:<15}{p.total_points:<10}{p.total_elims:<10}{p.wins:<6}{p.average_placement:.2f}\n")
+            f.write(
+                f"{rank:<6}{p.name:<15}{p.total_points:<8}"
+                f"{p.total_elims:<8}{p.wins:<6}{p.average_placement:.2f}\n"
+            )
 
-        f.write("="*50+"\n")
+        # MVP
+        mvp = sorted_players[0]
+        f.write("\n")
+        f.write("MVP OF THE TOURNAMENT\n")
+        f.write("═" * 55 + "\n")
+        f.write(
+            f"{mvp.name} finishes 1st with "
+            f"{mvp.total_points} points, "
+            f"{mvp.total_elims} eliminations, "
+            f"and {mvp.wins} wins.\n"
+        )
 
-    print(f"Tournament results exported to {filename}")
-    
+        f.write("═" * 55 + "\n")
+
+    print(f"📁 Tournament results exported to /tournaments/{safe_label}/{filename}")
+ 
 
 def cycle_tournament_type():
     keys = list(TOURNAMENT_TYPES.keys())
@@ -1477,6 +1642,33 @@ def tournament_template_menu():
                 return
 
         print("Invalid option.")
+        
+
+def print_season_progress_bar():
+    played = SEASON["tournaments_played"]
+    total = SEASON["tournaments_per_season"]
+    
+    if total == 0:
+        print("Season progress: (no tournaments set)")
+        return
+    
+    # Bar settings
+    bar_length = 16
+    filled = min(played, total)
+    empty = bar_length - filled
+    
+    # Build the bar
+    filled_char = "█"
+    empty_char = "░"
+    
+    bar = (
+        filled_char * filled +
+        empty_char * empty
+    )
+    
+    percent = (played / total) * 100 if total > 0 else 0
+    
+    print(f"[{bar}] ({percent:.0f}%)")
 
 
 def main_menu():
@@ -1489,15 +1681,15 @@ def main_menu():
         splash = random.choice(load_splash_texts())
         print(Colors.SOFT_PURPLE + Colors.ITALIC + splash + Colors.RESET)  
         print(f"\n📆 SEASON {SEASON['current_season']}")
-        print(f"Tournaments Played: {SEASON['tournaments_played']} / {SEASON['tournaments_per_season']}")
-        
+        print(f"Tournaments Played: {SEASON['tournaments_played']} / {SEASON['tournaments_per_season']}")   
+        print_season_progress_bar()
         print("\n1. Start Tournament")
         print("2. Tournament Setup")
         print("3. View Season History")
         print("4. Tournament Templates")
         print("5. Mods & Extras")
         print("6. Patch Notes")
-        print("7. Exit")
+        print("0. Exit")
         print("━" * 50)
         
         choice = input("> ").strip()
@@ -1567,7 +1759,7 @@ def main_menu():
         elif choice == "6":
             show_patch_notes()
         
-        elif choice == "7":
+        elif choice == "0":
             print("\nThanks for playing! See you next drop! 👋")
             exit()
             
@@ -1579,9 +1771,32 @@ def show_patch_notes():
     print("\n" + "═" * 60)
     print("📜  PATCH NOTES  –  Fortnite Tournament Simulator")
     print("═" * 60)
-    print("Last updated: January 12, 2026")
+    print("Last updated: January 17, 2026")
     print("")
     
+    print("v1.1.3 - Small QOL Update (January 17, 2026)")
+    print("──────────────────────────────────────") 
+    print("✨ New")
+    print("• Tournament leaderboard TXTs have been updated and are now stored in its own folder instead")
+    print("• New season progress bar in the main menu")
+    print("• Season length increased from 12 → 16 tournaments")
+    print("• New toggleable win ticker, calculates probability of a player winning the tournament!")
+    print("")
+    print("🔧 Balance & Behaviour Tweaks")
+    print("• Player skill calibration pass:")
+    print(" Adjusted a small number of players' skill based on real, recent solo tournament results.")
+    print(" These changes affect consistency, not guaranteed outcomes.")
+    print(" Noticeable adjustments include:")
+    print("  • Upl (slight increase)")
+    print("  • Kombek (slight increase)")
+    print("  • Blacha (slight increase)")
+    print("  • Hris (slight increase)")
+    print("")
+    print("• Org roster changes:")
+    print("  • Darm & Demus joined T1")
+    print("")
+    
+     
     print("v1.1.2 - (January 12, 2026)")
     print("──────────────────────────────────────") 
     print("✨ New")
@@ -1595,7 +1810,7 @@ def show_patch_notes():
     print("• Player skill calibration pass:")
     print(" Adjusted a small number of players' skill based on real, recent solo tournament results.")
     print(" These changes affect consistency, not guaranteed outcomes.")
-    print(" Noticable adjustments include:")
+    print(" Noticeable adjustments include:")
     print("  • Akiira (slight increase)")
     print("  • Kurama (slight increase)")
     print("  • Werex (slight increase)")
@@ -1669,6 +1884,8 @@ def pre_tournament_menu():
         print(f"5. TOURNAMENT TYPE: [{t_label}]")
 
         print(f"6. SPEED:           [{CONFIG['speed']}]")
+        ticker_status = "ON" if CONFIG.get("show_win_tickers", True) else "OFF"
+        print(f"7. WIN TICKERS:     [{ticker_status}]")
         print("\nType a number to change it, or 'B' to return to main menu")
         print("━" * 45)
 
@@ -1726,6 +1943,11 @@ def pre_tournament_menu():
                 print("⚠️  FAST mode reduces dramatic pauses")
             if CONFIG["speed"] == "INSTANT":
                 print("⚠️  INSTANT mode removes all cinematic viewing")
+                
+        elif choice == "7":
+            CONFIG["show_win_tickers"] = not CONFIG.get("show_win_tickers", True)
+            status = "ON" if CONFIG["show_win_tickers"] else "OFF"
+            print(f"Win ticker now {status} (shows at halftime + before finals)")
 
         else:
             print("Invalid option.")

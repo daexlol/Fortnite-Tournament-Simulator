@@ -12,7 +12,8 @@ CONFIG = {
     "speed": "NORMAL", # SLOW | NORMAL | FAST | INSTANT
     "random_seed": random.randint(1,1000),
     "tournament_type": "FNCS", # CASH CUP | FNCS | LAN EVENT | VICTORY CUP
-    "version": "1.1.2",
+    "show_win_tickers": True,
+    "version": "1.1.3",
     "build": "Stable", # or "Experimental"
 }
 
@@ -40,6 +41,7 @@ ORG_TAGS = {
     "Lyost": "Lyost",
     "FLC": "FLC",
     "The One": "One",
+    "T1": "T1",
 }
 
 def display_name(player):
@@ -81,3 +83,4 @@ def sim_sleep(seconds):
         time.sleep(seconds * 1.35)
     else:  # NORMAL
         time.sleep(seconds)
+        
