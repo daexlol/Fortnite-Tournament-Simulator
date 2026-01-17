@@ -6,7 +6,7 @@ import time
 import datetime
 from dataclasses import dataclass, field
 from typing import List
-from utils import display_name, ORG_TAGS, Colors, sim_sleep, CONFIG
+from utils import display_name, ORG_TAGS, Colors, sim_sleep, DEFAULT_CONFIG, CONFIG, BASE_DIR, DATA_DIR, save_config, load_config, save_active_mods, load_active_mods
 from mods import (
     TechnicalIssuesMod,
     RageQuitMod,
@@ -23,10 +23,11 @@ ACTIVE_MODS = [
     #PingDiffMod(bad_ping_chance=0.22),
 ]
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ACTIVE_MODS = load_active_mods(ACTIVE_MODS)
+
 TOURNAMENTS_ROOT = os.path.join(BASE_DIR, "tournaments")
-CAREER_FILE = "career_stats.json"
-SEASON_FILE = "season_data.json"
+CAREER_FILE = os.path.join(DATA_DIR, "career_stats.json")
+SEASON_FILE = os.path.join(DATA_DIR, "season_data.json")
 SPLASH_FILE = "splash.txt"
 SEASON = {
     "current_season": 1,
@@ -35,6 +36,8 @@ SEASON = {
     "season_players": {},
     "history": [],
 }
+
+os.makedirs(DATA_DIR, exist_ok=True)
 
 
 def load_splash_texts():
@@ -46,12 +49,7 @@ def load_splash_texts():
         return ["No splash.txt found... dropping in silence"]
     except Exception:
         return ["Error loading splashes... pretend this is funny"]
-
-# -----------------------------------------------------------
-# CONFIGURATION
-# -----------------------------------------------------------
-
-
+        
 
 random.seed(CONFIG["random_seed"])
 
@@ -269,6 +267,7 @@ def apply_tournament_template(key):
     CONFIG["storm_circles"] = template["storm_circles"]
     CONFIG["elim_points"] = template["elim_points"]
     CONFIG["tournament_type"] = template["tournament_type"]
+    save_config(CONFIG)
 
     print("\n✅ Tournament template applied:")
     print(f"🏆 {template['label']}")
@@ -1194,9 +1193,67 @@ def simulate_match(players: List[Player], match_number: int):
     print(f"\nMatch {match_number} complete! ✅")
     print("·" * 40)
     sim_sleep(1)
+    
+def walkout_hype(players: List[Player], count=10):
+    import random
+    top_players = [p for p in players if 90 <= p.skill <= 110]
+    if not top_players:
+        return
+
+    hype_players = random.sample(top_players, min(count, len(top_players)))
+
+    hype_lines = [
+		"🔥 Domination is key for {Colors.BOLD}{player}{Colors.RESET}! Eyes on the prize today, no stopping at 2nd place!",
+		"🎮 Watch out, {Colors.BOLD}{player}{Colors.RESET} is coming in hot-- expect a masterclass in elimination!",
+		"🏆 The crowd is cheering! {Colors.BOLD}{player}{Colors.RESET} is ready to turn this tournament upside down!",
+		"⚡ {Colors.BOLD}{player}{Colors.RESET} is feeling unstoppable today! Keep your eyes on the feed!",
+		"👀 All eyes on {Colors.BOLD}{player}{Colors.RESET}! Every move counts in this tournament!",
+		"🧠 Give it up for {Colors.BOLD}{player}{Colors.RESET}! Plenty of experience, but will it be enough to take them to the top? Let's see!",
+		"🍀 They say fortune favors the bold-- {Colors.BOLD}{player}{Colors.RESET} is ready to prove it!",
+		"🔥 All eyes on {Colors.BOLD}{player}{Colors.RESET}! Today, domination isn’t optional… it’s mandatory!",
+		"🎯 {Colors.BOLD}{player}{Colors.RESET} is ready to snatch the crown… will anyone stand in their way?",
+		"🍳 Rumor has it {Colors.BOLD}{player}{Colors.RESET} eats elimination points for breakfast!",
+		"🕹️ The LAN gods favor {Colors.BOLD}{player}{Colors.RESET}… will they answer the call?",
+		"💎 Precision, power, and poise -- {Colors.BOLD}{player}{Colors.RESET} is a one-person highlight reel!",
+		"🥳 {Colors.BOLD}{player}{Colors.RESET} doesn’t just drop… {Colors.BOLD}{player}{Colors.RESET} descends with flair!",
+		"🍕 They say {Colors.BOLD}{player}{Colors.RESET} fuels up on pizza and pure aggression!",
+		"🦄 {Colors.BOLD}{player}{Colors.RESET} is magical… but deadly. Expect the unexpected!",
+		"👑 {Colors.BOLD}{player}{Colors.RESET} walks in like royalty… the throne is up for grabs!",
+		"🎲 RNG, beware -- {Colors.BOLD}{player}{Colors.RESET} laughs in the face of chance!",
+		"🎉 {Colors.BOLD}{player}{Colors.RESET} is partying and slaying… simultaneously!",
+		"👀 {Colors.BOLD}{player}{Colors.RESET} sees everything… and so does your defeat!",
+		"💥 {Colors.BOLD}{player}{Colors.RESET} brings chaos… and maybe a little bit of glitter!",
+		"🛡️ Shields? What shields? {Colors.BOLD}{player}{Colors.RESET} melts 'em on sight!"
+]
+
+
+    print("\n" + Colors.SOFT_PURPLE + "🏟️ TOURNAMENT HYPE WALKOUTS 🏟️" + Colors.RESET)
+    print("━" * 50)
+    sim_sleep(2)
+
+    for p in hype_players:
+        if not hype_lines:
+            break
+        line_template = random.choice(hype_lines)
+        hype_lines.remove(line_template)
+        line = line_template.format(player=p.name, Colors=Colors)
+        for char in line:
+            print(char, end="", flush=True)
+            time.sleep(0.04)
+        print("\n")
+        time.sleep(1.5)
+    print("━" * 50 + "\n")
+    sim_sleep(2)
+
+
 
 
 def simulate_tournament():
+    new_seed = random.randint(1,1_000_000)
+    CONFIG["random_seed"] = new_seed
+    random.seed(new_seed)
+    save_config(CONFIG)
+	
     players = []
 
 
@@ -1222,6 +1279,8 @@ def simulate_tournament():
 
     load_career_data(players)
 
+    if CONFIG.get("walkouts", False):
+        walkout_hype(players)
 
     for match_number in range(1, CONFIG["matches"] + 1):
         simulate_match(players, match_number)
@@ -1602,6 +1661,7 @@ def cycle_tournament_type():
     current = CONFIG["tournament_type"]
     idx = keys.index(current)
     CONFIG["tournament_type"] = keys[(idx + 1) % len(keys)]
+    save_config(CONFIG)
     
 def view_season_history():
     if not SEASON["history"]:
@@ -1745,6 +1805,7 @@ def main_menu():
                         if 0 <= idx < len(ACTIVE_MODS):
                             mod = ACTIVE_MODS[idx]
                             mod.enabled = not mod.enabled
+                            save_active_mods(ACTIVE_MODS)
                             status = "ON" if mod.enabled else "OFF"
                             print(f"→ {mod.name} is now {status}")
                             sim_sleep(0.8)
@@ -1872,7 +1933,7 @@ def show_patch_notes():
 def pre_tournament_menu():
     while True:
         print("\n" + "━" * 45)
-        print("🎮 TOURNAMENT SETUP")
+        print("🎮 TOURNAMENT CONFIG")
         print("━" * 45)
         print(f"1. PLAYERS:         [{CONFIG['players']}]")
         print(f"2. MATCHES:         [{CONFIG['matches']}]")
@@ -1886,6 +1947,8 @@ def pre_tournament_menu():
         print(f"6. SPEED:           [{CONFIG['speed']}]")
         ticker_status = "ON" if CONFIG.get("show_win_tickers", True) else "OFF"
         print(f"7. WIN TICKERS:     [{ticker_status}]")
+        print(f"8. WALKOUTS:        [{ 'ON' if CONFIG.get('walkouts', False) else 'OFF' }]")
+        print(f"0. RESET TO DEFAULT")
         print("\nType a number to change it, or 'B' to return to main menu")
         print("━" * 45)
 
@@ -1893,11 +1956,23 @@ def pre_tournament_menu():
 
         if choice == "b":
             return
+            
+        elif choice == "0":
+            confirm = input("Are you sure you want to reset all config to default? (y/n)").strip().lower()
+            if confirm == "y":
+                CONFIG.clear()
+                CONFIG.update(DEFAULT_CONFIG.copy())
+                save_config(CONFIG)
+                print("✅ Config has been reset to default!")
+                sim_sleep(1)
+            else:
+                print("Reset cancelled.")
 
         elif choice == "1":
             val = input("Enter number of players: ").strip()
             if val.isdigit():
                 CONFIG["players"] = int(val)
+                save_config(CONFIG)
                 if CONFIG["players"] > 100:
                     print("⚠️  100+ players is not recommended (performance & pacing)")
                 if CONFIG["players"] < 20:
@@ -1907,6 +1982,7 @@ def pre_tournament_menu():
             val = input("Enter number of matches: ").strip()
             if val.isdigit():
                 CONFIG["matches"] = int(val)
+                save_config(CONFIG)
                 if CONFIG["matches"] > 20:
                     print("⚠️  Long tournaments heavily favor consistency")
                 if CONFIG["matches"] < 5:
@@ -1916,6 +1992,7 @@ def pre_tournament_menu():
             val = input("Enter storm circles: ").strip()
             if val.isdigit():
                 CONFIG["storm_circles"] = int(val)
+                save_config(CONFIG)
                 if CONFIG["storm_circles"] < 5:
                     print("⚠️  Fewer circles = faster, bloodier games")
                 if CONFIG["storm_circles"] > 12:
@@ -1925,6 +2002,7 @@ def pre_tournament_menu():
             val = input("Enter elim points: ").strip()
             if val.isdigit():
                 CONFIG["elim_points"] = int(val)
+                save_config(CONFIG)
                 if CONFIG["elim_points"] >= 5:
                     print("⚠️  High elim points strongly reward aggression")
                 if CONFIG["elim_points"] == 0:
@@ -1933,12 +2011,14 @@ def pre_tournament_menu():
         elif choice == "5":
             cycle_tournament_type()
             t = CONFIG["tournament_type"]
+            save_config(CONFIG)
             print(f"🏆 Tournament set to {TOURNAMENT_TYPES[t]['label']}")
 
         elif choice == "6":
             speeds = ["SLOW", "NORMAL", "FAST", "INSTANT"]
             current = speeds.index(CONFIG["speed"])
             CONFIG["speed"] = speeds[(current + 1) % len(speeds)]
+            save_config(CONFIG)
             if CONFIG["speed"] == "FAST":
                 print("⚠️  FAST mode reduces dramatic pauses")
             if CONFIG["speed"] == "INSTANT":
@@ -1948,9 +2028,17 @@ def pre_tournament_menu():
             CONFIG["show_win_tickers"] = not CONFIG.get("show_win_tickers", True)
             status = "ON" if CONFIG["show_win_tickers"] else "OFF"
             print(f"Win ticker now {status} (shows at halftime + before finals)")
-
+            save_config(CONFIG)
+            
+        elif choice == "8":
+            CONFIG["walkouts"] = not CONFIG.get("walkouts", False)
+            status = "ON" if CONFIG["walkouts"] else "OFF"
+            print(f"Player walkouts before tournaments are now {status}")
+            save_config(CONFIG)
+            
         else:
             print("Invalid option.")
+
 
 
 

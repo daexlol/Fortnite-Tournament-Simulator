@@ -1,6 +1,15 @@
-import random
-import time
-CONFIG = {
+if __name__ == "__main__":
+    raise RuntimeError("utils.py should not be run directly!")
+
+import os, json, random, time
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+
+CONFIG_FILE = os.path.join(DATA_DIR, "config.json")
+
+DEFAULT_CONFIG = {
     "players": 100,
     "matches": 12,
     "elim_points": 3,
@@ -9,13 +18,65 @@ CONFIG = {
     "max_poi_size": 3,
     "storm_circles": 12,
     "allow_griefing": True,
-    "speed": "NORMAL", # SLOW | NORMAL | FAST | INSTANT
-    "random_seed": random.randint(1,1000),
-    "tournament_type": "FNCS", # CASH CUP | FNCS | LAN EVENT | VICTORY CUP
+    "speed": "NORMAL",
+    "random_seed": random.randint(1, 1000),
+    "tournament_type": "FNCS",
     "show_win_tickers": True,
-    "version": "1.1.3",
-    "build": "Stable", # or "Experimental"
+    "walkouts": False,
+    "version": "1.1.4",
+    "build": "Stable",
 }
+
+def load_config():
+    if not os.path.exists(CONFIG_FILE):
+        save_config(DEFAULT_CONFIG)
+        return DEFAULT_CONFIG.copy()
+
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                raise ValueError("Config file invalid, resetting...")
+            return data
+    except (json.JSONDecodeError, ValueError):
+        print("⚠️  Config file empty or invalid, resetting to defaults...")
+        save_config(DEFAULT_CONFIG)
+        return DEFAULT_CONFIG.copy()
+
+def save_config(config):
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2)
+
+CONFIG = load_config()
+
+
+MODS_FILE = os.path.join(DATA_DIR, "active_mods.json")
+
+def save_active_mods(mods):
+    data = [{"name": mod.name, "enabled": mod.enabled} for mod in mods]
+    with open(MODS_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+def load_active_mods(all_mods):
+    if not os.path.exists(MODS_FILE):
+        save_active_mods(all_mods)
+        return all_mods
+
+    try:
+        with open(MODS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            name_to_mod = {mod.name: mod for mod in all_mods}
+            for item in data:
+                if item["name"] in name_to_mod:
+                    name_to_mod[item["name"]].enabled = item.get("enabled", False)
+        return all_mods
+    except (json.JSONDecodeError, ValueError):
+        print("⚠️  Mods file empty or invalid, resetting to defaults...")
+        save_active_mods(all_mods)
+        return all_mods
+
+
+
 
 ORG_TAGS = {
     "Gentle Mates": "M8",

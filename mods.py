@@ -18,7 +18,7 @@ class Mod:
         pass
 
     def on_fight(self, attacker, defender, config):
-        return True  # allow fight by default
+        return True
 
     def on_player_eliminated(self, victim, killer, config):
         pass
