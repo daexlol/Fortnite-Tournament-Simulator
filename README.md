@@ -1,110 +1,1 @@
-# \# Fortnite Tournament Simulator
-
-##### \## Solo queue chaos, broadcast vibes, and way too many crashes
-
-
-
-This is a Python-based, **text-driven** solo Fortnite tournament simulator that tries to feel like you're watching actual comp.
-
-Think FNCS Grand Finals (or other tournaments, whatever you fancy), if the lobby was filled with the 100 best pros on the region, battling constantly.
-
-It simulates tournaments, seasons, player performances, and unpredictable events through a modular mod system.
-
-
-
-
-
-###### **## Current Version**: v1.1.3 (January 2026)
-
-
-
-This project is a hobby project and is actively evolving.
-
-
-
-#### **## Features**
-
-* Solo tournament simulation -- pick your type! (Cash Cups, Victory Cups, FNCS, LAN events)
-* Customizable tournament setup! Change the players, matches, elim points and console speed to your liking
-* Season progression with stats and history
-* Persistent career stats to see who's on top
-* Psychological depth: player archetypes, confidence/tilt, rivals/fear, risk tolerance, grief bias
-* Working mod system (toggle on/off in-game)
-
-   - Technical Issues (crashes/no-loads)
-
-   - Ping Difference (teleporting + god-ping moments)
-
-   - Zero Build Flashback (no-build panic)
-
-   Mods are designed to be easily extendable via mods.py
-
-* Save/load system **(COMING SOON™)**
-
-
-
-This project is playable and stable, but still evolving.
-
-Some systems (such as fight logic and regional depth) are planned for major future updates.
-
-This is not a hyper-accurate competitive simulator -- realism is balanced with fun and randomness.
-
-
-
-##### **## How to Run**
-
-1. Make sure you have Python 3.8+
-2. No extra packages needed (pure stdlib + dataclasses)
-3. Download the repository (or a release ZIP)
-4. Extract the files
-5. Just run:
-
-
-
-###### 
-
-###### **python fortnite\_tournament\_sim.py**
-
-
-
-6\. Enjoy the menu. Press 1 to start simulating.
-
-
-
-###### **⚠️** ALWAYS launch the simulator from fortnite\_tournament\_sim.py!
-
-
-
-
-
-##### **## Controls/Tips**
-
-* Speed: INSTANT = no waiting, NORMAL = cinematic, SLOW = dramatic
-* Mods \& Extras (option 5): toggle chaos on/off
-* Patch Notes (option 6): see what's new without asking me again
-* Crashes/no-loads are real with the Technical Issues Mod - sometimes Swizzy just doesn't show up
-
-
-
-##### **## Saves \& Data**
-
-Career stats and season history are stored in the folder.
-
-Final tournament leaderboard is exported to txt.
-
-Deleting career\_stats.json will reset career stats to 0.
-
-Deleting season\_data.json will reset the simulator to a fresh Season 1.
-
-###### **SAVE FILES ARE PLANNED \& COMING SOON!**
-
-
-
-##### **## Contributing**
-
-It's open -- fork it, mod it, break it.
-
-And that's it! Have a run and let me know what you think.
-
-See you on the Battle Bus 🚎
-
+# \# Fortnite Tournament Simulator##### \## Solo queue chaos, broadcast vibes, and way too many crashesThis is a Python-based, **text-driven** solo Fortnite tournament simulator that tries to feel like you're watching actual comp.Think FNCS Grand Finals (or other tournaments, whatever you fancy), if the lobby was filled with the 100 best pros on the region, battling constantly.It simulates tournaments, seasons, player performances, and unpredictable events through a modular mod system.###### **## Current Version**: v1.2.0 (January 2026)This project is a hobby project and is actively evolving.#### **## Features*** Solo tournament simulation -- pick your type! (Cash Cups, Victory Cups, FNCS, LAN events)* Customizable tournament setup! Change the players, matches, elim points and console speed to your liking* Season progression with stats and history* Persistent career stats to see who's on top* Psychological depth: player archetypes, confidence/tilt, rivals/fear, risk tolerance, grief bias* Working mod system (toggle on/off in-game)   - Technical Issues (crashes/no-loads)   - Ping Difference (teleporting + god-ping moments)   - Zero Build Flashback (no-build panic)   Mods are designed to be easily extendable via mods.py* Save/load system **(COMING SOON™)**This project is playable and stable, but still evolving.Some systems (such as fight logic and regional depth) are planned for major future updates.This is not a hyper-accurate competitive simulator -- realism is balanced with fun and randomness.##### **## How to Run**1. Make sure you have Python 3.8+2. Have Rich library installed for nice tables3. Download the repository (or a release ZIP)4. Extract the files5. Just run:###### ###### **python fortnite\_tournament\_sim.py**6\. Enjoy the menu. Press 1 to start simulating.###### **⚠️** ALWAYS launch the simulator from fortnite\_tournament\_sim.py!##### **## Controls/Tips*** Speed: INSTANT = no waiting, NORMAL = cinematic, SLOW = dramatic* Mods \& Extras (option 5): toggle chaos on/off* Patch Notes (option 6): see what's new without asking me again* Crashes/no-loads are real with the Technical Issues Mod - sometimes Swizzy just doesn't show up##### **## Saves \& Data**Career stats and season history are stored in the folder.Final tournament leaderboard is exported to txt.Deleting career\_stats.json will reset career stats to 0.Deleting season\_data.json will reset the simulator to a fresh Season 1.###### **SAVE FILES ARE PLANNED \& COMING SOON!**##### **## Contributing**It's open -- fork it, mod it, break it.And that's it! Have a run and let me know what you think.See you on the Battle Bus 🚎

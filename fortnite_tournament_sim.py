@@ -7,6 +7,8 @@ import datetime
 from dataclasses import dataclass, field
 from typing import List
 from utils import display_name, ORG_TAGS, Colors, sim_sleep, DEFAULT_CONFIG, CONFIG, BASE_DIR, DATA_DIR, save_config, load_config, save_active_mods, load_active_mods
+from rich.console import Console
+from rich.table import Table
 from mods import (
     TechnicalIssuesMod,
     RageQuitMod,
@@ -14,6 +16,8 @@ from mods import (
     StreamSnipedMod,
     PingDiffMod,
 )
+
+console = Console(highlight=False)
 
 ACTIVE_MODS = [
     TechnicalIssuesMod(crash_chance=0.008, no_load_chance=0.012),
@@ -26,8 +30,12 @@ ACTIVE_MODS = [
 ACTIVE_MODS = load_active_mods(ACTIVE_MODS)
 
 TOURNAMENTS_ROOT = os.path.join(BASE_DIR, "tournaments")
-CAREER_FILE = os.path.join(DATA_DIR, "career_stats.json")
-SEASON_FILE = os.path.join(DATA_DIR, "season_data.json")
+
+REGION = CONFIG.get("region", "EU").lower()
+REGION_DATA_DIR = os.path.join(DATA_DIR, REGION)
+os.makedirs(REGION_DATA_DIR, exist_ok=True)
+CAREER_FILE = os.path.join(REGION_DATA_DIR, "career_stats.json")
+SEASON_FILE = os.path.join(REGION_DATA_DIR, "season_data.json")
 SPLASH_FILE = "splash.txt"
 SEASON = {
     "current_season": 1,
@@ -50,111 +58,335 @@ def load_splash_texts():
     except Exception:
         return ["Error loading splashes... pretend this is funny"]
         
+def set_region(region_name):
+    global REGION, REGION_DATA_DIR, CAREER_FILE, SEASON_FILE
+    REGION = region_name.lower()
+    REGION_DATA_DIR = os.path.join(DATA_DIR, REGION)
+    os.makedirs(REGION_DATA_DIR, exist_ok=True)
+    CAREER_FILE = os.path.join(REGION_DATA_DIR, "career_stats.json")
+    SEASON_FILE = os.path.join(REGION_DATA_DIR, "season_data.json")
+        
 
 random.seed(CONFIG["random_seed"])
 
-pro_players_skills = [
-    ("Swizzy", 110, "Fragger", "Free Agent"),
-    ("Merstach", 109, "Fragger", "Gentle Mates"),
-    ("Vico", 108, "Fragger", "BIG"),
-    ("Wox", 107, "Strategist", "HavoK"),
-    ("Pixie", 106, "Fragger", "HavoK"),
-    ("MariusCOW", 105, "Aggressive", "Gentle Mates"),
-    ("Tjino", 108, "Aggressive", "HavoK"),
-    ("PabloWingu", 108, "Aggressive", "HavoK"),
-    ("Chap", 108, "Fragger", "Free Agent"),
-    ("Shxrk", 107, "Fragger", "BIG"),
-    ("Scroll", 104, "Strategist", "Atlantic"),
-    ("Th0masHD", 103, "Strategist", "Free Agent"),
-    ("Kami", 109, "Passive", "Free Agent"),
-    ("Chico", 101, "Strategist", "Free Agent"),
-    ("Charyy", 100, "Passive", "Free Agent"),
-    ("Japko", 104, "Fragger", "Falcons"),
-    ("Queasy", 103, "Passive", "Free Agent"),
-    ("Veno", 102, "Fragger", "XSET"),
-    ("Flickzy", 101, "Aggressive", "Free Agent"),
-    ("P1ngfnz", 100, "Fragger", "Free Agent"),
-    ("Malibuca", 104, "Strategist", "Free Agent"),
-    ("Vanyak3k", 103, "Passive", "Gentle Mates"),
-    ("Fredoxie", 102, "Strategist", "Free Agent"),
-    ("MrSavage", 101, "Aggressive", "XSET"),
-    ("Sky", 100, "Strategist", "Atlantic"),
-    ("t3eny", 106, "Aggressive", "Free Agent"),
-    ("Trulex", 98, "Strategist", "Free Agent"),
-    ("Tayson", 97, "Strategist", "Falcons"),
-    ("IDrop", 104, "Fragger", "HavoK"),
-    ("Rezon", 95, "Fragger", "Wave"),
-    ("Setty", 99, "Passive", "Free Agent"),
-    ("Panzer", 98, "Strategist", "Free Agent"),
-    ("Vadeal", 87, "Passive", "Wave"),
-    ("Focus", 86, "Fragger", "Free Agent"),
-    ("Akiira", 95, "Fragger", "Gentle Mates"),
-    ("Rax", 84, "Fragger", "Free Agent"),
-    ("Kurama", 99, "Fragger", "Solary"),
-    ("Werex", 98, "Strategist", "Lyost"),
-    ("Seyyto", 94, "Strategist", "Free Agent"),
-    ("Kiro", 86, "Strategist", "Free Agent"),
-    ("Podasai", 85, "Strategist", "Free Agent"),
-    ("Momsy", 89, "Strategist", "Free Agent"),
-    ("Pixx", 90, "Passive", "HavoK"),
-    ("Demus", 92, "Fragger", "T1"),
-    ("Darm", 90, "Fragger", "T1"),
-    ("Sangild", 85, "Strategist", "Free Agent"),
-    ("Huty", 84, "Strategist", "The One"),
-    ("F1shyX", 83, "Strategist", "Free Agent"),
-    ("Mappi", 83, "Strategist", "Free Agent"),
-    ("Moneymaker", 82, "Fragger", "Free Agent"),
-    ("Mongraal", 81, "Aggressive", "Free Agent"),
-    ("Wheat", 80, "Strategist", "FLC"),
-    ("NeFrizi", 79, "Strategist", "Detect"),
-    ("Twi", 78, "Aggressive", "Free Agent"),
-    ("SkyJump", 77, "Fragger", "Solary"),
-    ("Mikson", 76, "Fragger", "Free Agent"),
-    ("Upl", 80, "Fragger", "Free Agent"),
-    ("Kombek", 79, "Fragger", "Free Agent"),
-    ("Blacha", 78, "Passive", "Free Agent"),
-    ("Hris", 77, "Fragger", "Free Agent"),
-    ("Ankido", 71, "Strategist", "BIG"),
-    ("Cringe", 70, "Strategist", "AVE"),
-    ("Volko", 69, "Strategist", "BIG"),
-    ("JannisZ", 78, "Passive", "CGN"),
-    ("Pinq", 75, "Passive", "Free Agent"),
-    ("Dela", 83, "Aggressive", "Free Agent"),
-    ("Bevvys", 83, "Aggressive", "Free Agent"),
-    ("Eclipse", 78, "Aggressive", "Free Agent"),
-    ("Hellfire", 83, "Strategist", "Free Agent"),
-    ("Andilex", 86, "Fragger", "MGA"),
-    ("Kiduoo", 71, "Passive", "BIG"),
-    ("Robin", 70, "Strategist", "FOKUS"),
-    ("Kyto", 70, "Fragger", "Free Agent"),
-    ("Hijoe", 70, "Strategist", "Aight"),
-    ("Dandepuzo", 73, "Fragger", "TKRF"),
-    ("iFr0zi", 70, "Passive", "FataL"),
-    ("Skvii", 85, "Strategist", "Free Agent"),
-    ("Fastroki", 70, "Strategist", "Free Agent"),
-    ("1Lusha", 76, "Aggressive", "Free Agent"),
-    ("S1neD", 78, "Strategist", "NTO Corp"),
-    ("F1n4ik", 75, "Fragger", "FLC"),
-    ("Howly", 75, "Fragger", "Free Agent"),
-    ("G13ras", 70, "Strategist", "Detect"),
-    ("CZB", 79, "Aggressive", "Free Agent"),
-    ("Axeforce", 78, "Aggressive", "Free Agent"),
-    ("Fnajen", 79, "Fragger", "Free Agent"),
-    ("Predage", 80, "Passive", "Free Agent"),
-    ("Deckzee", 78, "Aggressive", "Free Agent"),
-    ("Artskill", 84, "Aggressive", "Free Agent"),
-    ("Xsweeze", 82, "Strategist", "Free Agent"),
-    ("Noahreyli", 81, "Fragger", "Free Agent"),
-    ("Snayzy", 80, "Strategist", "HavoK"),
-    ("Tidi", 75, "Fragger", "Free Agent"),
-    ("Zangi", 80, "Fragger", "Free Agent"),
-    ("Franek", 80, "Aggressive", "Free Agent"),
-    ("Asa", 80, "Passive", "Free Agent"),
-    ("Belusi", 79, "Fragger", "Free Agent"),
-    ("Refsgaard", 78, "Strategist", "Free Agent"),
-    ("Nxthan", 77, "Fragger", "Free Agent"),
-    ("Juu", 76, "Strategist", "FataL"),
-]
+PRO_PLAYER_POOLS = {
+    "EU": [
+		("Swizzy", 110, "Fragger", "Free Agent"),
+		("Merstach", 109, "Fragger", "Gentle Mates"),
+		("Vico", 108, "Fragger", "BIG"),
+		("Wox", 107, "Strategist", "HavoK"),
+		("Pixie", 106, "Fragger", "HavoK"),
+		("MariusCOW", 105, "Aggressive", "Gentle Mates"),
+		("Tjino", 108, "Aggressive", "HavoK"),
+		("PabloWingu", 108, "Aggressive", "HavoK"),
+		("Chap", 108, "Fragger", "Free Agent"),
+		("Shxrk", 107, "Fragger", "BIG"),
+		("Scroll", 104, "Strategist", "Atlantic"),
+		("Th0masHD", 103, "Strategist", "Free Agent"),
+		("Kami", 109, "Passive", "Free Agent"),
+		("Chico", 101, "Strategist", "Free Agent"),
+		("Charyy", 100, "Passive", "Free Agent"),
+		("Japko", 104, "Fragger", "Falcons"),
+		("Queasy", 103, "Passive", "Free Agent"),
+		("Veno", 102, "Fragger", "XSET"),
+		("Flickzy", 101, "Aggressive", "Free Agent"),
+		("P1ngfnz", 100, "Fragger", "Free Agent"),
+		("Malibuca", 104, "Strategist", "Free Agent"),
+		("Vanyak3k", 103, "Passive", "Gentle Mates"),
+		("Fredoxie", 102, "Strategist", "Free Agent"),
+		("MrSavage", 101, "Aggressive", "XSET"),
+		("Sky", 100, "Strategist", "Atlantic"),
+		("t3eny", 106, "Aggressive", "Free Agent"),
+		("Trulex", 98, "Strategist", "Free Agent"),
+		("Tayson", 97, "Strategist", "Falcons"),
+		("IDrop", 104, "Fragger", "HavoK"),
+		("Rezon", 95, "Fragger", "WAVE"),
+		("Setty", 99, "Passive", "Free Agent"),
+		("Panzer", 98, "Strategist", "Free Agent"),
+		("Vadeal", 87, "Passive", "WAVE"),
+		("Focus", 86, "Fragger", "Free Agent"),
+		("Akiira", 95, "Fragger", "Gentle Mates"),
+		("Rax", 84, "Fragger", "Free Agent"),
+		("Kurama", 99, "Fragger", "Solary"),
+		("Werex", 98, "Strategist", "Lyost"),
+		("Seyyto", 94, "Strategist", "K13"),
+		("Kiro", 86, "Strategist", "Free Agent"),
+		("Podasai", 85, "Strategist", "Free Agent"),
+		("Momsy", 89, "Strategist", "Free Agent"),
+		("Pixx", 90, "Passive", "HavoK"),
+		("Demus", 92, "Fragger", "T1"),
+		("Darm", 90, "Fragger", "T1"),
+		("Sangild", 85, "Strategist", "Free Agent"),
+		("Huty", 84, "Strategist", "The One"),
+		("F1shyX", 83, "Strategist", "Free Agent"),
+		("Mappi", 83, "Strategist", "Free Agent"),
+		("Moneymaker", 82, "Fragger", "Free Agent"),
+		("Mongraal", 81, "Aggressive", "Free Agent"),
+		("Wheat", 80, "Strategist", "FLC"),
+		("NeFrizi", 79, "Strategist", "Detect"),
+		("Twi", 78, "Aggressive", "Free Agent"),
+		("SkyJump", 77, "Fragger", "Solary"),
+		("Mikson", 76, "Fragger", "Free Agent"),
+		("Upl", 80, "Fragger", "Free Agent"),
+		("Kombek", 79, "Fragger", "Free Agent"),
+		("Blacha", 78, "Passive", "Free Agent"),
+		("Hris", 77, "Fragger", "Free Agent"),
+		("Ankido", 71, "Strategist", "BIG"),
+		("Cringe", 70, "Strategist", "AVE"),
+		("Volko", 69, "Strategist", "BIG"),
+		("JannisZ", 78, "Passive", "CGN"),
+		("Pinq", 75, "Passive", "Free Agent"),
+		("Dela", 83, "Aggressive", "Free Agent"),
+		("Bevvys", 83, "Aggressive", "Free Agent"),
+		("Eclipse", 78, "Aggressive", "Free Agent"),
+		("Hellfire", 83, "Strategist", "Free Agent"),
+		("Andilex", 86, "Fragger", "MGA"),
+		("Kiduoo", 71, "Passive", "BIG"),
+		("Robin", 70, "Strategist", "FOKUS"),
+		("Kyto", 70, "Fragger", "Free Agent"),
+		("Hijoe", 70, "Strategist", "Aight"),
+		("Dandepuzo", 73, "Fragger", "TKRF"),
+		("iFr0zi", 70, "Passive", "FataL"),
+		("Skvii", 85, "Strategist", "Free Agent"),
+		("Fastroki", 70, "Strategist", "Free Agent"),
+		("1Lusha", 76, "Aggressive", "Free Agent"),
+		("S1neD", 78, "Strategist", "NTO Corp"),
+		("F1n4ik", 75, "Fragger", "FLC"),
+		("Howly", 75, "Fragger", "Free Agent"),
+		("G13ras", 70, "Strategist", "Detect"),
+		("CZB", 79, "Aggressive", "Free Agent"),
+		("Axeforce", 78, "Aggressive", "Free Agent"),
+		("Fnajen", 79, "Fragger", "Free Agent"),
+		("Predage", 80, "Passive", "Free Agent"),
+		("Deckzee", 78, "Aggressive", "Free Agent"),
+		("Artskill", 84, "Aggressive", "Free Agent"),
+		("Xsweeze", 82, "Strategist", "Free Agent"),
+		("Noahreyli", 81, "Fragger", "Free Agent"),
+		("Snayzy", 80, "Strategist", "HavoK"),
+		("Tidi", 75, "Fragger", "Free Agent"),
+		("Zangi", 80, "Fragger", "Free Agent"),
+		("Franek", 80, "Aggressive", "MGA"),
+		("Asa", 80, "Passive", "Free Agent"),
+		("Belusi", 79, "Fragger", "Free Agent"),
+		("Refsgaard", 78, "Strategist", "Free Agent"),
+		("Nxthan", 77, "Fragger", "Free Agent"),
+		("Juu", 76, "Strategist", "FataL"),
+	],
+
+    "NA": [
+        ('Peterbot', 113, 'Aggressive', 'Falcons'),
+        ('Cold', 109, 'Aggressive', 'Twisted Minds'),
+        ('Ajerss', 108, 'Fragger', 'Gen.G'),
+        ('Pollo', 108, 'Fragger', 'Gentle Mates'),
+        ('Higgs', 107, 'Aggressive', 'XSET'),
+        ('Eomzo', 107, 'Strategist', 'Elite'),
+        ('Muz', 106, 'Fragger', 'XSET'),
+        ('Rapid', 106, 'Strategist', 'Xen'),
+        ('Ritual', 105, 'Fragger', 'Gen.G'),
+        ('Boltz', 105, 'Aggressive', 'Twisted Minds'),
+        ('Clix', 104, 'Fragger', 'XSET'),
+        ('Sphinx', 104, 'Passive', 'Free Agent'),
+        ('Acorn', 103, 'Passive', 'Dignitas'),
+        ('Khanada', 103, 'Fragger', 'Dignitas'),
+        ('Cooper', 102, 'Fragger', 'Dignitas'),
+        ('Threats', 102, 'Aggressive', 'Free Agent'),
+        ('Ark', 102, 'Fragger', 'Dignitas'),
+        ('Rise', 101, 'Passive', 'Free Agent'),
+        ('Bugha', 101, 'Strategist', 'Free Agent'),
+        ('Avivv', 100, 'Fragger', '2AM'),
+        ('Reet', 100, 'Strategist', 'Free Agent'),
+        ('Shadow', 100, 'Fragger', 'Free Agent'),
+        ('Skqttles', 99, 'Passive', 'Free Agent'),
+        ('VerT', 99, 'Strategist', 'Void'),
+        ('GMoney', 99, 'Fragger', '2AM'),
+        ('PXMP', 90, 'Aggressive', 'Elite'),
+        ('EpikWhale', 95, 'Strategist', 'Free Agent'),
+        ('Noxy', 87, 'Passive', 'Free Agent'),
+        ('Aminished', 87, 'Strategist', 'Past Bliss'),
+        ('Chimp', 76, 'Fragger', 'Team Pulsar'),
+        ('Channce', 76, 'Fragger', 'Team Pulsar'),
+        ('Brycx', 85, 'Strategist', 'Free Agent'),
+        ('Braydz', 85, 'Fragger', 'Free Agent'),
+        ('Curve', 74, 'Aggressive', 'Free Agent'),
+        ('oSydd', 74, 'Fragger', 'Free Agent'),
+        ('Visxals', 73, 'Strategist', 'Free Agent'),
+        ('Vergo', 73, 'Strategist', 'Rising Legends'),
+        ('Parz', 72, 'Passive', 'Free Agent'),
+        ('Seek', 72, 'Aggressive', 'Free Agent'),
+        ('Bacca', 71, 'Fragger', 'Free Agent'),
+        ('Curly', 71, 'Strategist', 'Free Agent'),
+        ('Nvtylerh', 70, 'Aggressive', 'Free Agent'),
+        ('Dash', 70, 'Fragger', 'REIGN'),
+        ('Mason', 70, 'Strategist', 'Void'),
+        ('Kraez', 69, 'Aggressive', 'Cynapse'),
+        ('VicterV', 69, 'Fragger', 'Free Agent'),
+        ('Paper', 69, 'Passive', 'Free Agent'),
+        ('Eshouu', 68, 'Aggressive', 'Free Agent'),
+        ('Tkay', 68, 'Fragger', 'Free Agent'),
+        ('Ozone', 68, 'Strategist', 'One True Army'),
+        ('Edgey', 68, 'Fragger', 'Free Agent'),
+        ('Dukez', 68, 'Fragger', 'Free Agent'),
+        ('Cam', 68, 'Strategist', 'Free Agent'),
+        ('OliverOG', 68, 'Passive', 'Dignitas'),
+        ('Trashy', 67, 'Aggressive', 'Free Agent'),
+        ('Chubs', 67, 'Fragger', 'Free Agent'),
+        ('Krreon', 67, 'Strategist', 'Monarcos'),
+        ('Veer', 67, 'Aggressive', 'Free Agent'),
+        ('Npen', 66, 'Fragger', 'Free Agent'),
+        ('Aiden', 66, 'Passive', 'Team Lumina'),
+        ('Takii', 66, 'Aggressive', 'Void'),
+        ('Kwanti', 66, 'Fragger', 'Free Agent'),
+        ('Mero', 95, 'Fragger', 'Xen'),
+        ('Bacon', 65, 'Aggressive', 'Free Agent'),
+        ('Ceneto', 65, 'Strategist', 'Saku'),
+        ('Tonyfv', 65, 'Fragger', 'Free Agent'),
+        ('Dolzeur', 65, 'Passive', 'Free Agent'),
+        ('Bucke', 93, 'Strategist', 'Dignitas'),
+        ('Xavi', 64, 'Aggressive', 'Free Agent'),
+        ('Bylah', 64, 'Fragger', 'Free Agent'),
+        ('Void', 64, 'Strategist', 'Free Agent'),
+        ('Blake', 64, 'Passive', 'Soul Runner'),
+        ('Aoxy', 63, 'Aggressive', 'Free Agent'),
+        ('Okis', 63, 'Fragger', 'Free Agent'),
+        ('Jojofishy', 63, 'Strategist', 'Free Agent'),
+        ('Hound', 63, 'Aggressive', 'Free Agent'),
+        ('Deyy', 74, 'Aggressive', 'Free Agent'),
+        ('Scare', 62, 'Fragger', 'Cynapse'),
+        ('Noizy', 62, 'Passive', 'Monarcos'),
+        ('Golden', 62, 'Strategist', 'One True Army'),
+        ('Krisp', 62, 'Aggressive', 'Free Agent'),
+        ('Liam', 62, 'Fragger', 'H1TMAN'),
+        ('Evyn', 61, 'Strategist', 'Free Agent'),
+        ('Vortek', 61, 'Aggressive', 'Free Agent'),
+        ('Chaos', 61, 'Fragger', 'Free Agent'),
+        ('Death', 60, 'Aggressive', 'Free Agent'),
+        ('Hxvac', 60, 'Strategist', 'Visual'),
+        ('Broken', 60, 'Passive', 'Vertios'),
+        ('Zandaa', 60, 'Fragger', 'H1TMAN'),
+        ('Jaqck', 59, 'Aggressive', 'Free Agent'),
+        ('Encrypted', 59, 'Strategist', 'Free Agent'),
+        ('Zeus', 59, 'Aggressive', 'Free Agent'),
+        ('Freeze', 59, 'Passive', 'One True Army'),
+        ('Phenom', 58, 'Fragger', 'Free Agent'),
+        ('Nekko', 58, 'Aggressive', 'Free Agent'),
+        ('NoahWPlays', 58, 'Strategist', 'Free Agent'),
+        ('Sandman', 57, 'Passive', 'Free Agent'),
+        ('Josh', 57, 'Fragger', 'Free Agent'),
+        ('Nurface', 57, 'Aggressive', 'Free Agent'),
+        ('Circ', 56, 'Strategist', 'Free Agent'),
+    ],
+        "MIXED": [
+        ("Swizzy", 110, "Fragger", "Free Agent"),
+        ("Merstach", 109, "Fragger", "Gentle Mates"),
+        ("Kami", 109, "Passive", "Free Agent"),
+        ("Vico", 108, "Fragger", "BIG"),
+        ("Tjino", 108, "Aggressive", "HavoK"),
+        ("PabloWingu", 108, "Aggressive", "HavoK"),
+        ("Chap", 108, "Fragger", "Free Agent"),
+        ("Wox", 107, "Strategist", "HavoK"),
+        ("Shxrk", 107, "Fragger", "BIG"),
+        ("Pixie", 106, "Fragger", "HavoK"),
+        ("t3eny", 106, "Aggressive", "Free Agent"),
+        ("MariusCOW", 105, "Aggressive", "Gentle Mates"),
+        ("Scroll", 104, "Strategist", "Atlantic"),
+        ("Japko", 104, "Fragger", "Falcons"),
+        ("Malibuca", 104, "Strategist", "Free Agent"),
+        ("IDrop", 104, "Fragger", "HavoK"),
+        ("Th0masHD", 103, "Strategist", "Free Agent"),
+        ("Queasy", 103, "Passive", "Free Agent"),
+        ("Vanyak3k", 103, "Passive", "Gentle Mates"),
+        ("Veno", 102, "Fragger", "XSET"),
+        ("Fredoxie", 102, "Strategist", "Free Agent"),
+        ("Chico", 101, "Strategist", "Free Agent"),
+        ("Flickzy", 101, "Aggressive", "Free Agent"),
+        ("MrSavage", 101, "Aggressive", "XSET"),
+        ("Charyy", 100, "Passive", "Free Agent"),
+        ("P1ngfnz", 100, "Fragger", "Free Agent"),
+        ("Sky", 100, "Strategist", "Atlantic"),
+        ("Setty", 99, "Passive", "Free Agent"),
+        ("Kurama", 99, "Fragger", "Solary"),
+        ("Trulex", 98, "Strategist", "Free Agent"),
+        ("Panzer", 98, "Strategist", "Free Agent"),
+        ("Werex", 98, "Strategist", "Lyost"),
+        ("Tayson", 97, "Strategist", "Falcons"),
+        ("Rezon", 95, "Fragger", "WAVE"),
+        ("Akiira", 95, "Fragger", "Gentle Mates"),
+        ("Seyyto", 94, "Strategist", "K13"),
+        ("Demus", 92, "Fragger", "T1"),
+        ("Pixx", 90, "Passive", "HavoK"),
+        ("Darm", 90, "Fragger", "T1"),
+        ("Momsy", 89, "Strategist", "Free Agent"),
+        ("Vadeal", 87, "Passive", "WAVE"),
+        ("Focus", 86, "Fragger", "Free Agent"),
+        ("Kiro", 86, "Strategist", "Free Agent"),
+        ("Andilex", 86, "Fragger", "MGA"),
+        ("Podasai", 85, "Strategist", "Free Agent"),
+        ("Sangild", 85, "Strategist", "Free Agent"),
+        ("Skvii", 85, "Strategist", "Free Agent"),
+        ("Rax", 84, "Fragger", "Free Agent"),
+        ("Huty", 84, "Strategist", "The One"),
+        ("Artskill", 84, "Aggressive", "Free Agent"),
+        ("Peterbot", 113, "Aggressive", "Falcons"),
+        ("Cold", 109, "Aggressive", "Twisted Minds"),
+        ("Ajerss", 108, "Fragger", "Gen.G"),
+        ("Pollo", 108, "Fragger", "Gentle Mates"),
+        ("Higgs", 107, "Aggressive", "XSET"),
+        ("Eomzo", 107, "Strategist", "Elite"),
+        ("Muz", 106, "Fragger", "XSET"),
+        ("Rapid", 106, "Strategist", "Xen"),
+        ("Ritual", 105, "Fragger", "Gen.G"),
+        ("Boltz", 105, "Aggressive", "Twisted Minds"),
+        ("Clix", 104, "Fragger", "XSET"),
+        ("Sphinx", 104, "Passive", "Free Agent"),
+        ("Acorn", 103, "Passive", "Dignitas"),
+        ("Khanada", 103, "Fragger", "Dignitas"),
+        ("Cooper", 102, "Fragger", "Dignitas"),
+        ("Threats", 102, "Aggressive", "Free Agent"),
+        ("Ark", 102, "Fragger", "Dignitas"),
+        ("Rise", 101, "Passive", "Free Agent"),
+        ("Bugha", 101, "Strategist", "Free Agent"),
+        ("Avivv", 100, "Fragger", "2AM"),
+        ("Reet", 100, "Strategist", "Free Agent"),
+        ("Shadow", 100, "Fragger", "Free Agent"),
+        ("Skqttles", 99, "Passive", "Free Agent"),
+        ("VerT", 99, "Strategist", "Void"),
+        ("GMoney", 99, "Fragger", "2AM"),
+        ("EpikWhale", 95, "Strategist", "Free Agent"),
+        ("Mero", 95, "Fragger", "Xen"),
+        ("Bucke", 93, "Strategist", "Dignitas"),
+        ("PXMP", 88, "Aggressive", "Elite"),
+        ("Noxy", 87, "Passive", "Free Agent"),
+        ("Aminished", 87, "Strategist", "Past Bliss"),
+        ("Braydz", 85, "Fragger", "Free Agent"),
+        ("Chimp", 76, "Fragger", "Team Pulsar"),
+        ("Channce", 76, "Fragger", "Team Pulsar"),
+        ("Brycx", 75, "Strategist", "Free Agent"),
+        ("Curve", 74, "Aggressive", "Free Agent"),
+        ("oSydd", 74, "Fragger", "Free Agent"),
+        ("Deyy", 74, "Aggressive", "Free Agent"),
+        ("Visxals", 73, "Strategist", "Free Agent"),
+        ("Vergo", 73, "Strategist", "Rising Legends"),
+        ("Parz", 72, "Passive", "Free Agent"),
+        ("Seek", 72, "Aggressive", "Free Agent"),
+        ("Bacca", 71, "Fragger", "Free Agent"),
+        ("Curly", 71, "Strategist", "Free Agent"),
+        ("Nvtylerh", 70, "Aggressive", "Free Agent"),
+        ("Dash", 70, "Fragger", "REIGN"),
+        ("Mason", 70, "Strategist", "Void"),
+        ("Kraez", 69, "Aggressive", "Cynapse"),
+        ("VicterV", 69, "Fragger", "Free Agent"),
+        ("Paper", 69, "Passive", "Free Agent"),
+    ],
+}
+
+def get_pro_players_from_config():
+    region = CONFIG.get("region", "EU")
+    pool = PRO_PLAYER_POOLS.get(region)
+
+    if not pool:
+        raise ValueError(f"No player pool found for region '{region}'")
+
+    return pool
 
 ARCHETYPES = ["Fragger", "Passive", "Strategist", "Aggressive"]
 
@@ -248,6 +480,7 @@ TOURNAMENT_TEMPLATES = {
         "storm_circles": 12,
         "elim_points": 4,
         "tournament_type": "LAN",
+        "region": "MIXED",
     },
     "VICTORY_CUP": {
         "label": "VICTORY CUP",
@@ -691,40 +924,63 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "First game. First win. You couldn’t script it better.",
                 "Starts the day absolutely on fire.",
                 "Sets the tone early — this lobby has been warned.",
-                "Game 1 and already making noise.",
-                "That is how you announce yourself.",
-                "What a way to start the tournament.",
-                "Opens the tournament with a statement win.",
                 f"Coming in hot! {name} steals a win in the first game.",
-                f"{name} just put the lobby on notice!",
                 "They came, they dropped, they dominated.",
-                f"First blood? Nah, first ROYALE. {name} is cooking!",
-                f"{name} sending a dangerous message in the first game.",
+                "First blood? Nah, first ROYALE. {name} is cooking!",
+                "The lobby did not see this coming.",
+                "Already making the scoreboard sweat.",
+                "Drops like a hammer, wins like a pro.",
+                f"{name} just showed everyone that 'warm-up game' is a myth.",
+                "Someone call the fire department — this lobby is on blaze.",
+                "First game jitters? Not here.",
+                "That's one for the highlight reel... if they don't mess up next match.",
+                "First blood, first bragging rights.",
+                "They came, they saw, they conquered game one.",
+                "Lobby's still waking up, and they're already winning.",
+                "Opens the day like they own the lobby.",
+                "Kickstarts the tournament with style points.",
+                "A calm start? Forget it, this is chaos already!",
             ]
         elif match_number == total_matches:
             commentary = [
                 "Leaves it until the final game — and delivers.",
                 "First win in the LAST possible moment.",
                 "When it mattered most, they showed up.",
-                "Clutch factor through the roof in the final game.",
-                "That win changes everything.",
                 "Ice in the veins — unbelievable timing.",
-                "Leaves it late — but still gets it done.",
-                "First win, last chance. Ice cold.",
-                "Pressure makes diamonds, and it sure did here.",
                 "Saved it for the final game — ice cold!",
-                "They didn’t just win — they closed the chapter.",
+                f"{name} just wins in dramatic fashion. Someone cue the music.",
+                "Final game energy: cinematic edition.",
+                "That win should come with a soundtrack.",
+                "Closes it out like a true champion.",
+                "That final push was a statement nobody will forget.",
+                "Tournament finale? Nailed it.",
+                "All the pressure, all the stakes... and they're still smiling.",
+                "Saved the best for last. Or maybe just got lucky.",
             ]
         else:
             commentary = [
-                "Finally breaks through with their first win.",
-                "That pressure has been building all tournament.",
-                "They’ve been knocking on the door — now it’s kicked in.",
-                "Persistence pays off in a big way.",
-                "That win was overdue.",
-                "Momentum might just be shifting.",
                 "Gets the monkey off their back.",
-                "A win like that gets them back in action.",
+                "Finally breaks through with their first win.",    
+                "That pressure has been building all tournament.",
+                "They’ve been knocking on the door -- now it’s kicked in.",
+                "Persistence pays off in a big way.",
+                "The first of many? Only time will tell.",
+                f"{name} proves why they’re still in the race.",
+                "That awkward moment when everyone else is still landing.",
+                "They win, and you just sit there like 'ok… wow.'",
+                "Suddenly, the lobby realizes they might be in trouble.",
+                "Took a few tries, but they finally cracked it.",
+                "Finally found their rythym -- lobby beware.",
+                "Monkey off back, now they're swinging through the leaderboard.",
+                "That's the spark they needed to catch fire.",
+                "Well, about time... we were starting to worry.",
+                f"Took you long enough, {name}...",
+                "Casters are questioning if anyone else even exists.",
+                "Takes the crown they've been chasing.",
+                "Breaks the streak, earns the respect.",
+                "Finally puts that one to bed.",
+                "The pressure valve has officially popped!",
+                
             ]
 
     elif wins >= 2 and prev_wins == wins - 1:
@@ -733,73 +989,74 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Back-to-back wins to start the tournament.",
                 "Two games. Two victories. Unreal pace.",
                 "No cooldown between wins — straight dominance.",
-                "They’re setting the bar ridiculously high.",
-                "This could get scary if it continues.",
                 "The rest of the lobby is already chasing.",
-                "Wins the first two games — unreal pace.",
-                "Nobody is slowing them down right now.",
                 f"Back-to-back! {name} is on FIRE!",
+                "Somebody check if this is a new exploit.",
+                f"{name} is just here to collect trophies, apparently.",
+                "Even the virtual fans are standing up.",
+                "Double trouble -- they're untouchable!",
+                "The streak is real, and it's scary.",
+                "If this keeps up, we'll need a new rulebook.",
+                "They're on a mission... and the rest are just extras.",
             ]
         elif wins == 3:
             commentary = [
                 "That’s three wins in a row.",
                 "Absolute control of the tournament.",
                 "This is starting to feel inevitable.",
-                "Nobody has an answer right now.",
-                "They’re playing a different game.",
                 "Pure dominance from start to finish.",
                 "This is turning into a solo highlight reel.",
+                f"{name} just broke the 'fun for others' rule.",
+                "If the lobby had a scoreboard fear factor, it’s off the charts.",
+                "Three games, zero mercy, infinite swagger.",
             ]
         else:
             commentary = [
                 f"{wins} wins in a row — this is unreal.",
-                "This is turning into a solo highlight reel.",
-                "The lobby belongs to them right now.",
                 "Every fight feels unfair.",
                 "They are dictating the entire tournament.",
-                "This is historic-level dominance.",
+                "Historic-level dominance right here.",
                 f"{wins} in a row — the rest of the lobby is just renting space.",
-                "They’re not winning matches — they’re collecting trophies.",
-                "Unreal pace. Somebody get this man a cooldown.",
+                f"{name} could be streaming in VR and still win the lobby.",
+                "Somebody check the physics — is this even possible?",
+                "The rest of the lobby might just start playing hide-and-seek.",
             ]
 
     else:
         if match_number == total_matches:
             commentary = [
                 "Closes out the tournament with a huge win.",
-                "Ends the day exactly how they wanted.",
-                "That’s a perfect way to finish.",
                 "Final game, final statement.",
                 "They saved something special for the end.",
                 "That win will be remembered.",
-                "Pressure makes diamonds, and it sure did here.",
-                "When it mattered most... they SHOWED UP.",
-                "Clutch factor through the roof. Legendary.",
-                "Last game, last royale. Storybook finish.",
+                f"{name} wins, and everyone else collectively facepalms.",
+                "That moment when you realize you’re watching a legend in action.",
+                "Final game glory: meme edition.",
             ]
         else:
             commentary = [
                 f"That’s win number {wins} of the tournament.",
                 "Keeps themselves firmly in the title race.",
-                "Another crucial Victory Royale.",
-                "They stay right in the mix.",
-                "That win could be massive for the standings.",
                 "Consistency like this wins tournaments.",
+                f"{name} just casually reminds everyone who's boss.",
+                "The lobby collectively sighs in despair.",
+                "Somebody tell the others: it’s over… for now.",
+                "Momentum is officially theirs.",
+                "Who gave them the lobby keys?",
+                f"{wins} wins? Somebody call the mata police.",
+                f"Yup, {name}'s getting nerfed next update.",
+                "Skill checks? They're passing with flying colours!",
+                "Collectors of victories, masters of mayhem.",
+                f"Skill level: over {wins}000.",
+                "They don't chase the leaderboard -- it runs from them.",
+                "The lobby called, they want their dignity back.",
+                "Their highlight reel just got another clip.",
             ]
 
-    if random.random() < 0.25:
-        banter = [
-            "Casters are out of breath just watching this.",
-            "The lobby is shook. I’m shook.",
-            "That was not in the script. Holy...",
-            "I need to see the VOD — that was insane.",
-            "Somebody clip that. Right now.",
-            "I’m not crying, YOU’RE crying.",
-            "This is why we watch comp Fortnite.",
-        ]
-        return f"{random.choice(commentary)} {random.choice(banter)}"
+        return f"{random.choice(commentary)}"
 
     return random.choice(commentary)
+
 
 
 def update_tournament_context(players: List[Player]):
@@ -1194,9 +1451,9 @@ def simulate_match(players: List[Player], match_number: int):
     print("·" * 40)
     sim_sleep(1)
     
-def walkout_hype(players: List[Player], count=10):
+def walkout_hype(players: List[Player], count=15):
     import random
-    top_players = [p for p in players if 90 <= p.skill <= 110]
+    top_players = [p for p in players if 90 <= p.skill <= 113]
     if not top_players:
         return
 
@@ -1208,7 +1465,7 @@ def walkout_hype(players: List[Player], count=10):
 		"🏆 The crowd is cheering! {Colors.BOLD}{player}{Colors.RESET} is ready to turn this tournament upside down!",
 		"⚡ {Colors.BOLD}{player}{Colors.RESET} is feeling unstoppable today! Keep your eyes on the feed!",
 		"👀 All eyes on {Colors.BOLD}{player}{Colors.RESET}! Every move counts in this tournament!",
-		"🧠 Give it up for {Colors.BOLD}{player}{Colors.RESET}! Plenty of experience, but will it be enough to take them to the top? Let's see!",
+		"🧠 Give it up for {Colors.BOLD}{player}{Colors.RESET}! Plenty of experience, but will it be enough to take them to the top?",
 		"🍀 They say fortune favors the bold-- {Colors.BOLD}{player}{Colors.RESET} is ready to prove it!",
 		"🔥 All eyes on {Colors.BOLD}{player}{Colors.RESET}! Today, domination isn’t optional… it’s mandatory!",
 		"🎯 {Colors.BOLD}{player}{Colors.RESET} is ready to snatch the crown… will anyone stand in their way?",
@@ -1223,7 +1480,15 @@ def walkout_hype(players: List[Player], count=10):
 		"🎉 {Colors.BOLD}{player}{Colors.RESET} is partying and slaying… simultaneously!",
 		"👀 {Colors.BOLD}{player}{Colors.RESET} sees everything… and so does your defeat!",
 		"💥 {Colors.BOLD}{player}{Colors.RESET} brings chaos… and maybe a little bit of glitter!",
-		"🛡️ Shields? What shields? {Colors.BOLD}{player}{Colors.RESET} melts 'em on sight!"
+		"🛡️ Shields? What shields? {Colors.BOLD}{player}{Colors.RESET} melts 'em on sight!",
+		"💥 Lobby panic mode: {Colors.BOLD}{player}{Colors.RESET} just stepped onto the stage!",
+		"💪 Full send or bust-- {Colors.BOLD}{player}'s{Colors.RESET} locked and loaded.",
+        "🔥 {Colors.BOLD}{player}{Colors.RESET} is walking in like they own the lobby… and maybe the tournament too!",
+	    "🎮 Watch {Colors.BOLD}{player}{Colors.RESET} drop like a meteor — chaos incoming!",
+	    "⚡ Lightning in human form: {Colors.BOLD}{player}{Colors.RESET} just entered the arena!",
+	    "👀 Eyes peeled! {Colors.BOLD}{player}{Colors.RESET} is scanning, aiming, and ready to slay!",
+	    "👻 Spooky or not, {Colors.BOLD}{player}{Colors.RESET} haunts the leaderboard with style.",
+	    "🥷 Silent but deadly: {Colors.BOLD}{player}{Colors.RESET} just entered the battlefield.",    
 ]
 
 
@@ -1239,9 +1504,9 @@ def walkout_hype(players: List[Player], count=10):
         line = line_template.format(player=p.name, Colors=Colors)
         for char in line:
             print(char, end="", flush=True)
-            time.sleep(0.04)
+            sim_sleep(0.04)
         print("\n")
-        time.sleep(1.5)
+        sim_sleep(1.5)
     print("━" * 50 + "\n")
     sim_sleep(2)
 
@@ -1253,6 +1518,8 @@ def simulate_tournament():
     CONFIG["random_seed"] = new_seed
     random.seed(new_seed)
     save_config(CONFIG)
+    pro_players_skills = get_pro_players_from_config()
+
 	
     players = []
 
@@ -1303,17 +1570,34 @@ def sort_leaderboard(players: List[Player]):
     return players
 
 def print_leaderboard(players: List[Player]):
-    print("\n" + "━"*60)
-    print(" FINAL FORTNITE TOURNAMENT LEADERBOARD")
-    print("━"*60)
-    print(f"{'Rank':<6}{'Player':<15}{'Points':<10}{'Elims':<10}{'Wins':<6}{'Avg Place'}")
-    print("━"*60)
+    console.print("\n" + "━"*60)
+    console.print(" FINAL FORTNITE TOURNAMENT LEADERBOARD")
+    console.print("━"*60)
+
+    table = Table(show_header=True, header_style=None)
+
+    table.add_column("RANK", justify="right", width=4)
+    table.add_column("PLAYER", width=12)
+    table.add_column("POINTS", justify="right", width=7)
+    table.add_column("ELIMS", justify="right", width=5)
+    table.add_column("WINS", justify="right", width=5)
+    table.add_column("AVG PLACE", justify="right")
+    table.add_column("EARNINGS", justify="right")
+
     for rank, p in enumerate(players, 1):
-        print(
-            f"{rank:<6}{p.name:<16}{p.total_points:<10}{p.total_elims:<10}"
-            f"{p.wins:<6}{p.average_placement:.2f} +${p.tournament_earnings:,}"
+        rank_display = {1: "🥇", 2: "🥈", 3: "🥉"}.get(rank, str(rank))
+        table.add_row(
+            str(rank_display),
+            p.name,
+            str(p.total_points),
+            str(p.total_elims),
+            str(p.wins),
+            f"{p.average_placement:.2f}",
+            f"+${p.tournament_earnings:,}"
         )
-    print("━"*60)
+
+    console.print(table)
+    console.print("━"*60)
 
 def update_careers(players: List[Player]):
     leaderboard = sort_leaderboard(players)
@@ -1462,13 +1746,26 @@ def show_player_history(players: List[Player]):
                 for p in career_players:
                     if p.org != "Free Agent":
                         org_totals[p.org] = org_totals.get(p.org, 0) + p.career_earnings
+
                 sorted_orgs = sorted(org_totals.items(), key=lambda x: x[1], reverse=True)
-                print(f"\n{'Rank':<6}{'Org':<20}{'Total Earnings'}")
-                print("━"*50)
+
+                table = Table(show_header=True, header_style=None)
+
+                table.add_column("Rank", justify="right", width=6)
+                table.add_column("Org", width=20)
+                table.add_column("Total Earnings", justify="right")
+
                 for rank, (org_name, earnings) in enumerate(sorted_orgs, 1):
-                    print(f"{rank:<6}{org_name:<20}${earnings:,}")
-                print("━"*50)
+                    table.add_row(
+                        str(rank),
+                        org_name,
+                        f"${earnings:,}"
+                    )
+
+                console.print()
+                console.print(table)
                 continue
+
 
             if sort_option == "earnings":
                 career_players.sort(key=lambda p: p.career_earnings, reverse=True)
@@ -1479,43 +1776,77 @@ def show_player_history(players: List[Player]):
             elif sort_option == "tournaments":
                 career_players.sort(key=lambda p: p.career_tournaments, reverse=True)
 
-            print(f"\n{'Rank':<6}{'Player':<15}{'Wins':<6}{'Tournaments':<12}{'Kills':<8}{'Earnings'}")
-            print("━"*60)
+            table = Table(title=" CAREER LEADERBOARD ")
+
+            table.add_column("Rank", justify="right")
+            table.add_column("Player")
+            table.add_column("Wins", justify="right")
+            table.add_column("Tournaments", justify="right")
+            table.add_column("Kills", justify="right")
+            table.add_column("Earnings", justify="right")
+
             for rank, p in enumerate(career_players, 1):
-                print(f"{rank:<6}{p.name:<16}{p.career_wins:<6}{p.career_tournaments:<12}{p.career_kills:<8}${p.career_earnings:,}")
-            print("━"*60)
-            continue
+                table.add_row(
+                    str(rank),
+                    p.name,
+                    str(p.career_wins),
+                    str(p.career_tournaments),
+                    str(p.career_kills),
+                    f"${p.career_earnings:,}"
+                )
+
+            console.print(table)
 
         elif user_input == "season":
             if not SEASON["season_players"]:
                 print("No season data yet — play some tournaments!")
                 continue
 
+            active_names = {p.name for p in players}
+
             season_players = []
             for name, stats in SEASON["season_players"].items():
+                if name not in active_names:
+                    continue
+
                 player = next((p for p in sorted_players if p.name == name), None)
-                if player:
-                    season_players.append((player, stats))
-                else:
-                    season_players.append((Player(name=name), stats))
-                    
+                season_players.append((player, name, stats))
+
+
             sort_option = input("Sort by (earnings/points/wins/elims): ").lower()
             if sort_option == "points":
-                season_players.sort(key=lambda x: x[1]["points"], reverse=True)
+                season_players.sort(key=lambda x: x[2]["points"], reverse=True)
             elif sort_option == "wins":
-                season_players.sort(key=lambda x: x[1]["wins"], reverse=True)
+                season_players.sort(key=lambda x: x[2]["wins"], reverse=True)
             elif sort_option == "elims":
-                season_players.sort(key=lambda x: x[1]["elims"], reverse=True)
+                season_players.sort(key=lambda x: x[2]["elims"], reverse=True)
             else:
-                season_players.sort(key=lambda x: x[1]["earnings"], reverse=True)
+                season_players.sort(key=lambda x: x[2]["earnings"], reverse=True)
 
+            table = Table(show_header=True, header_style=None)
 
-            print(f"\n{'Rank':<6}{'Player':<15}{'Points':<8}{'Wins':<6}{'Elims':<8}{'Earnings'}")
-            print("━"*60)
-            for rank, (p, stats) in enumerate(season_players, 1):
-                print(f"{rank:<6}{p.name:<16}{stats['points']:<8}{stats['wins']:<6}{stats['elims']:<8}${stats['earnings']:,}")
-            print("━"*60)
+            table.add_column("Rank", justify="right", width=6)
+            table.add_column("Player", width=15)
+            table.add_column("Points", justify="right", width=8)
+            table.add_column("Wins", justify="right", width=6)
+            table.add_column("Elims", justify="right", width=8)
+            table.add_column("Earnings", justify="right")
+
+            for rank, (p, name, stats) in enumerate(season_players, 1):
+                display_name = p.name if p else name
+                table.add_row(
+                    str(rank),
+                    display_name,
+                    str(stats["points"]),
+                    str(stats["wins"]),
+                    str(stats["elims"]),
+                    f"${stats['earnings']:,}"
+                )
+
+            console.print()
+            console.print(table)
             continue
+
 
         player = None
         if user_input.isdigit():
@@ -1549,21 +1880,26 @@ def show_player_history(players: List[Player]):
 
         if player:
             rank = sorted_players.index(player) + 1
-            print(f"\n{player.name}")
-            print(f"{player.org}")
-            print(f"Ranking: #{rank}")
-            print(f"Total Points: {player.total_points}")
-            print(f"Total Kills: {player.total_elims}")
-            print(f"Total Wins: {player.wins}\n")
-            print(f"{'MATCH':<8}{'PLACEMENT':<12}{'KILLS'}")
-            print("━"*30)
+
+            console.print(f"\n{player.name}")
+            console.print(f"{player.org}")
+            console.print(f"Ranking: #{rank}")
+            console.print(f"Total Points: {player.total_points}")
+            console.print(f"Total Kills: {player.total_elims}")
+            console.print(f"Total Wins: {player.wins}\n")
+
+            table = Table(title="MATCH HISTORY", show_lines=True)
+            table.add_column("MATCH", justify="left", style="")
+            table.add_column("PLACEMENT", justify="left", style="")
+            table.add_column("KILLS", justify="left", style="")
+
             for idx, (placement, kills) in enumerate(zip(player.placements, player.match_kills), 1):
-                print(f"{idx:<8}{placement:<12}{kills}")
-            print("━"*30)
+                table.add_row(str(idx), str(placement), str(kills))
+
+            console.print(table)
 
             if hasattr(player, "career_earnings"):
                 print(f"\n🏅 Career Stats for {player.name}")
-                print(f"Total Tournament Wins: {player.career_wins}")
                 print(f"Total Tournament Wins: {player.career_wins}")
                 print(f"Total Cash Cup Wins: {player.career_cashcup_wins}")
                 print(f"Total Victory Cup Game Wins: {player.career_victorycup_wins}")
@@ -1595,10 +1931,11 @@ def export_tournament_results(players: List[Player], matches: int):
     tournament_dir = os.path.join(TOURNAMENTS_ROOT, safe_label)
 
     os.makedirs(tournament_dir, exist_ok=True)
+    region = CONFIG.get("region", "EU")
 
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f"{safe_label}_{timestamp}.txt"
+    filename = f"{safe_label}_{region}_{timestamp}.txt"
     filepath = os.path.join(tournament_dir, filename)
 
 
@@ -1733,6 +2070,7 @@ def print_season_progress_bar():
 
 def main_menu():
     load_season()
+
     
     while True:
         print("\n" + "━" * 50)
@@ -1740,7 +2078,7 @@ def main_menu():
         print("━" * 50)
         splash = random.choice(load_splash_texts())
         print(Colors.SOFT_PURPLE + Colors.ITALIC + splash + Colors.RESET)  
-        print(f"\n📆 SEASON {SEASON['current_season']}")
+        print(f"\n📆 SEASON {SEASON['current_season']} - {CONFIG['region']}")
         print(f"Tournaments Played: {SEASON['tournaments_played']} / {SEASON['tournaments_per_season']}")   
         print_season_progress_bar()
         print("\n1. Start Tournament")
@@ -1947,8 +2285,9 @@ def pre_tournament_menu():
 
         print(f"6. SPEED:           [{CONFIG['speed']}]")
         ticker_status = "ON" if CONFIG.get("show_win_tickers", True) else "OFF"
-        print(f"7. WIN TICKERS:     [{ticker_status}]")
-        print(f"8. WALKOUTS:        [{ 'ON' if CONFIG.get('walkouts', False) else 'OFF' }]")
+        print(f"7. REGION:          [{CONFIG.get('region', 'EU')}]")
+        print(f"8. WIN TICKERS:     [{ticker_status}]")
+        print(f"9. WALKOUTS:        [{ 'ON' if CONFIG.get('walkouts', False) else 'OFF' }]")
         print(f"0. RESET TO DEFAULT")
         print("\nType a number to change it, or 'B' to return to main menu")
         print("━" * 45)
@@ -2026,12 +2365,22 @@ def pre_tournament_menu():
                 print("⚠️  INSTANT mode removes all cinematic viewing")
                 
         elif choice == "7":
+            regions = list(PRO_PLAYER_POOLS.keys())
+            region = CONFIG.get("region", "EU")
+            current = regions.index(region)
+            CONFIG["region"] = regions[(current + 1) % len(regions)]
+            save_config(CONFIG)
+            print(f"🌍 Region set to {CONFIG['region']}")
+            print(f"⚠️ Please restart the simulator to apply changes properly!")
+
+                
+        elif choice == "8":
             CONFIG["show_win_tickers"] = not CONFIG.get("show_win_tickers", True)
             status = "ON" if CONFIG["show_win_tickers"] else "OFF"
             print(f"Win ticker now {status} (shows at halftime + before finals)")
             save_config(CONFIG)
             
-        elif choice == "8":
+        elif choice == "9":
             CONFIG["walkouts"] = not CONFIG.get("walkouts", False)
             status = "ON" if CONFIG["walkouts"] else "OFF"
             print(f"Player walkouts before tournaments are now {status}")
