@@ -82,29 +82,29 @@ PRO_PLAYER_POOLS = {
 		("Chap", 108, "Fragger", "Free Agent"),
 		("Shxrk", 107, "Fragger", "BIG"),
 		("Scroll", 104, "Strategist", "Atlantic"),
-		("Th0masHD", 103, "Strategist", "Free Agent"),
+		("Th0masHD", 103, "Strategist", "Virtus Pro"),
 		("Kami", 109, "Passive", "Free Agent"),
 		("Chico", 101, "Strategist", "Free Agent"),
-		("Charyy", 100, "Passive", "Free Agent"),
+		("Charyy", 104, "Passive", "Free Agent"),
 		("Japko", 104, "Fragger", "Falcons"),
 		("Queasy", 103, "Passive", "Free Agent"),
 		("Veno", 102, "Fragger", "XSET"),
 		("Flickzy", 101, "Aggressive", "Free Agent"),
 		("P1ngfnz", 100, "Fragger", "Free Agent"),
-		("Malibuca", 104, "Strategist", "Free Agent"),
+		("Malibuca", 105, "Strategist", "Free Agent"),
 		("Vanyak3k", 103, "Passive", "Gentle Mates"),
 		("Fredoxie", 102, "Strategist", "Free Agent"),
 		("MrSavage", 101, "Aggressive", "XSET"),
 		("Sky", 100, "Strategist", "Atlantic"),
 		("t3eny", 106, "Aggressive", "Free Agent"),
 		("Trulex", 98, "Strategist", "Free Agent"),
-		("Tayson", 97, "Strategist", "Falcons"),
+		("Tayson", 97, "Strategist", "Free Agent"),
 		("IDrop", 104, "Fragger", "HavoK"),
 		("Rezon", 95, "Fragger", "WAVE"),
 		("Setty", 99, "Passive", "Free Agent"),
 		("Panzer", 98, "Strategist", "Free Agent"),
 		("Vadeal", 87, "Passive", "WAVE"),
-		("Focus", 86, "Fragger", "Free Agent"),
+		("Focus", 86, "Fragger", "Virtus Pro"),
 		("Akiira", 95, "Fragger", "Gentle Mates"),
 		("Rax", 84, "Fragger", "Free Agent"),
 		("Kurama", 99, "Fragger", "Solary"),
@@ -141,7 +141,7 @@ PRO_PLAYER_POOLS = {
 		("Eclipse", 78, "Aggressive", "Free Agent"),
 		("Hellfire", 83, "Strategist", "Free Agent"),
 		("Andilex", 86, "Fragger", "MGA"),
-		("Kiduoo", 71, "Passive", "BIG"),
+		("Kiduoo", 71, "Passive", "Free Agent"),
 		("Robin", 70, "Strategist", "FOKUS"),
 		("Kyto", 70, "Fragger", "Free Agent"),
 		("Hijoe", 70, "Strategist", "Aight"),
@@ -149,7 +149,7 @@ PRO_PLAYER_POOLS = {
 		("iFr0zi", 70, "Passive", "FataL"),
 		("Skvii", 85, "Strategist", "Free Agent"),
 		("Fastroki", 70, "Strategist", "Free Agent"),
-		("1Lusha", 76, "Aggressive", "Free Agent"),
+		("1Lusha", 76, "Aggressive", "Lyost"),
 		("S1neD", 78, "Strategist", "NTO Corp"),
 		("F1n4ik", 75, "Fragger", "FLC"),
 		("Howly", 75, "Fragger", "Free Agent"),
@@ -174,10 +174,10 @@ PRO_PLAYER_POOLS = {
 	],
 
     "NA": [
-        ('Peterbot', 113, 'Aggressive', 'Falcons'),
+        ('Peterbot', 113, 'Fragger', 'Falcons'),
         ('Cold', 109, 'Aggressive', 'Twisted Minds'),
         ('Ajerss', 108, 'Fragger', 'Gen.G'),
-        ('Pollo', 108, 'Fragger', 'Gentle Mates'),
+        ('Pollo', 108, 'Fragger', 'Free Agent'),
         ('Higgs', 107, 'Aggressive', 'XSET'),
         ('Eomzo', 107, 'Strategist', 'Elite'),
         ('Muz', 106, 'Fragger', 'XSET'),
@@ -290,9 +290,9 @@ PRO_PLAYER_POOLS = {
         ("MariusCOW", 105, "Aggressive", "Gentle Mates"),
         ("Scroll", 104, "Strategist", "Atlantic"),
         ("Japko", 104, "Fragger", "Falcons"),
-        ("Malibuca", 104, "Strategist", "Free Agent"),
+        ("Malibuca", 105, "Strategist", "Free Agent"),
         ("IDrop", 104, "Fragger", "HavoK"),
-        ("Th0masHD", 103, "Strategist", "Free Agent"),
+        ("Th0masHD", 103, "Strategist", "Virtus Pro"),
         ("Queasy", 103, "Passive", "Free Agent"),
         ("Vanyak3k", 103, "Passive", "Gentle Mates"),
         ("Veno", 102, "Fragger", "XSET"),
@@ -300,7 +300,7 @@ PRO_PLAYER_POOLS = {
         ("Chico", 101, "Strategist", "Free Agent"),
         ("Flickzy", 101, "Aggressive", "Free Agent"),
         ("MrSavage", 101, "Aggressive", "XSET"),
-        ("Charyy", 100, "Passive", "Free Agent"),
+        ("Charyy", 104, "Passive", "Free Agent"),
         ("P1ngfnz", 100, "Fragger", "Free Agent"),
         ("Sky", 100, "Strategist", "Atlantic"),
         ("Setty", 99, "Passive", "Free Agent"),
@@ -308,7 +308,7 @@ PRO_PLAYER_POOLS = {
         ("Trulex", 98, "Strategist", "Free Agent"),
         ("Panzer", 98, "Strategist", "Free Agent"),
         ("Werex", 98, "Strategist", "Lyost"),
-        ("Tayson", 97, "Strategist", "Falcons"),
+        ("Tayson", 97, "Strategist", "Free Agent"),
         ("Rezon", 95, "Fragger", "WAVE"),
         ("Akiira", 95, "Fragger", "Gentle Mates"),
         ("Seyyto", 94, "Strategist", "K13"),
@@ -317,7 +317,7 @@ PRO_PLAYER_POOLS = {
         ("Darm", 90, "Fragger", "T1"),
         ("Momsy", 89, "Strategist", "Free Agent"),
         ("Vadeal", 87, "Passive", "WAVE"),
-        ("Focus", 86, "Fragger", "Free Agent"),
+        ("Focus", 86, "Fragger", "Virtus Pro"),
         ("Kiro", 86, "Strategist", "Free Agent"),
         ("Andilex", 86, "Fragger", "MGA"),
         ("Podasai", 85, "Strategist", "Free Agent"),
@@ -326,10 +326,10 @@ PRO_PLAYER_POOLS = {
         ("Rax", 84, "Fragger", "Free Agent"),
         ("Huty", 84, "Strategist", "The One"),
         ("Artskill", 84, "Aggressive", "Free Agent"),
-        ("Peterbot", 113, "Aggressive", "Falcons"),
+        ("Peterbot", 113, "Fragger", "Falcons"),
         ("Cold", 109, "Aggressive", "Twisted Minds"),
         ("Ajerss", 108, "Fragger", "Gen.G"),
-        ("Pollo", 108, "Fragger", "Gentle Mates"),
+        ("Pollo", 108, "Fragger", "Free Agent"),
         ("Higgs", 107, "Aggressive", "XSET"),
         ("Eomzo", 107, "Strategist", "Elite"),
         ("Muz", 106, "Fragger", "XSET"),
@@ -553,6 +553,7 @@ class Player:
     career_lan_wins: int = 0
     career_victorycup_wins: int = 0
     best_finish: int = 999
+    career_achievements: list = field(default_factory=list)
     
     current_rank: int = 0
     points_to_first: int = 0
@@ -567,7 +568,7 @@ class Player:
     fear: dict = field(default_factory=dict)
     
     _has_rage_quit: bool = field(default=False)
-
+    
 
     def add_match_result(self, placement, elims, points):
         self.total_points += points
@@ -664,6 +665,7 @@ def load_career_data(players: List[Player]):
             p.career_lan_wins = stats.get("lan_wins", 0)
             p.career_victorycup_wins = stats.get("victorycup_wins", 0)
             p.best_finish = stats.get("best_finish", 999)
+            p.career_achievements = stats.get("achievements", [])
 
 
 def save_career_data(players: List[Player]):
@@ -679,6 +681,7 @@ def save_career_data(players: List[Player]):
             "lan_wins": p.career_lan_wins,
             "victorycup_wins": p.career_victorycup_wins,
             "best_finish": p.best_finish,
+            "achievements": getattr(p, "career_achievements", [])
         }
 
     with open(CAREER_FILE, "w", encoding="utf-8") as f:
@@ -912,6 +915,29 @@ def print_tournament_win_ticker(players, current_match, total_matches):
     sim_sleep(1.5)
 
 
+LEGEND_COMMENTARY = [
+    "This is why their name is etched into history.",
+    "Years of dominance showing up right on cue.",
+    "That’s not luck — that’s legacy.",
+    "They’ve done this before. Many times.",
+    "Moments like this are routine for legends.",
+    "This is muscle memory at championship level.",
+    "The lobby knows exactly who just won.",
+    "Another chapter in an already stacked career.",
+]
+
+GOAT_COMMENTARY = [
+    "Different tier. Different rules.",
+    "This lobby is just another page in the history book.",
+    "They make greatness look casual.",
+    "The GOAT does GOAT things.",
+    "This isn’t a tournament — it’s a reminder.",
+    "Generational talent on full display.",
+    "The skill gap just introduced itself.",
+    "They’re not chasing history. They *are* history.",
+]
+
+
 def get_victory_commentary(winner, match_number: int, total_matches: int):
     wins = winner.wins
     prev_wins = getattr(winner, "previous_wins", wins - 1)
@@ -926,7 +952,7 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Sets the tone early — this lobby has been warned.",
                 f"Coming in hot! {name} steals a win in the first game.",
                 "They came, they dropped, they dominated.",
-                "First blood? Nah, first ROYALE. {name} is cooking!",
+                f"First blood? Nah, first ROYALE. {name} is cooking!",
                 "The lobby did not see this coming.",
                 "Already making the scoreboard sweat.",
                 "Drops like a hammer, wins like a pro.",
@@ -1053,7 +1079,21 @@ def get_victory_commentary(winner, match_number: int, total_matches: int):
                 "Their highlight reel just got another clip.",
             ]
 
-        return f"{random.choice(commentary)}"
+    tier = get_career_tier(winner)
+
+    if tier in ("Legend", "GOAT"):
+        legacy_roll = random.random()
+
+
+        chance = 0.35 if tier == "GOAT" else 0.22
+
+        if legacy_roll < chance:
+            legacy_lines = GOAT_COMMENTARY if tier == "GOAT" else LEGEND_COMMENTARY
+
+            if random.random() < 0.5:
+                return random.choice(legacy_lines)
+            else:
+                return f"{random.choice(commentary)} {random.choice(legacy_lines)}"
 
     return random.choice(commentary)
 
@@ -1409,7 +1449,11 @@ def simulate_match(players: List[Player], match_number: int):
     sim_sleep(0.5)
     print(f"• Match Kills: {elims.get(winner.id, 0)}")
     sim_sleep(0.5)
-    print(f"• Placement Points: {placement_points(1)}")
+    if t_type == "VICTORY_CUP":
+        print(f"• Placement Points: 100")
+    else:
+        print(f"• Placement Points: {placement_points(1)}")
+		
     sim_sleep(0.5)
     print(f"• Total Points: {winner.total_points}")
     sim_sleep(1)
@@ -1610,6 +1654,14 @@ def update_careers(players: List[Player]):
         earned = get_prize_for_rank(rank, p)
         p.career_earnings += earned
         p.tournament_earnings = earned
+        if rank <= 10:
+            p.career_achievements.append({
+                "placement": rank,
+                "type": t_type,
+                "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+                "earnings": earned
+            })
+
 
         if rank == 1 and t_type != "VICTORY_CUP":
             p.career_wins += 1
@@ -1666,7 +1718,6 @@ def end_season():
     print(f"⭐ Earnings: ${stats['earnings']:,} | Points: {stats['points']} | Wins: {stats['wins']} | Elims: {stats['elims']}")
     print(f"   MVP Quote: {random.choice(mvp_quotes)}")
     print("━" * 60)
-    # Reset season
     SEASON["current_season"] += 1
     SEASON["tournaments_played"] = 0
     SEASON["season_players"] = {}
@@ -1716,19 +1767,148 @@ def show_org_page(org_name, players):
     for p in sorted(org_players, key=lambda p: p.career_earnings, reverse=True):
         print(f"{display_name(p):<16}{p.career_wins:<6}{p.career_kills:<8}${p.career_earnings:,}")
     print("━" * 60)
+    
+def compare_players(p1, p2):
+    console.print("\n⚔️ PLAYER COMPARISON ⚔️")
+    console.print("━" * 60)
+
+    def arrow(val1, val2, higher_is_better=True):
+        if val1 == val2:
+            return "[grey]—[/]"
+        if (val1 > val2 and higher_is_better) or (val1 < val2 and not higher_is_better):
+            return "[green]▲[/]"
+        else:
+            return "[red]▼[/]"
+
+    top10 = lambda p: sum(1 for a in getattr(p, "career_achievements", []) if a["placement"] <= 10)
+    top5 = lambda p: sum(1 for a in getattr(p, "career_achievements", []) if a["placement"] <= 5)
+    dominance = lambda p: p.career_lan_wins*3 + p.career_fncs_wins*2 + p.career_cashcup_wins*1 + p.career_victorycup_wins*1
+    major_ratio = lambda p: (p.career_lan_wins + p.career_fncs_wins) / max(1, (p.career_cashcup_wins + p.career_victorycup_wins))
+    earnings_per_major = lambda p: p.career_earnings / max(1, (p.career_lan_wins + p.career_fncs_wins))
+    total_major_wins = lambda p: p.career_fncs_wins + p.career_lan_wins
+
+    table = Table(
+        show_header=True,
+        header_style="bold",
+        box=None,
+        show_lines=True
+    )
+
+    table.add_column("", justify="left", width=22)
+    table.add_column(p1.name, justify="center", width=16)
+    table.add_column("│", justify="center", width=3)
+    table.add_column(p2.name, justify="center", width=16)
+
+    table.add_row("Org", p1.org, "│", p2.org)
+    table.add_row("Career Tier", f"👑 {get_career_tier(p1)}", "│", f"👑 {get_career_tier(p2)}")
+
+    table.add_row("📊 CAREER OVERVIEW", "—", "—", "—")
+    table.add_row("Tournament Wins", f"{arrow(p1.career_wins, p2.career_wins)} {p1.career_wins}", "│", f"{arrow(p2.career_wins, p1.career_wins)} {p2.career_wins}")
+    table.add_row("Tournaments Played", f"{arrow(p1.career_tournaments, p2.career_tournaments)} {p1.career_tournaments}", "│", f"{arrow(p2.career_tournaments, p1.career_tournaments)} {p2.career_tournaments}")
+    table.add_row("Career Eliminations", f"{arrow(p1.career_kills, p2.career_kills)} {p1.career_kills}", "│", f"{arrow(p2.career_kills, p1.career_kills)} {p2.career_kills}")
+    table.add_row("Career Earnings", f"{arrow(p1.career_earnings, p2.career_earnings)} ${p1.career_earnings:,}", "│", f"{arrow(p2.career_earnings, p1.career_earnings)} ${p2.career_earnings:,}")
+
+    table.add_row("🏆 MAJOR TITLES", "—", "—", "—")
+    table.add_row("LAN Titles", f"{arrow(p1.career_lan_wins, p2.career_lan_wins)} {p1.career_lan_wins}", "│", f"{arrow(p2.career_lan_wins, p1.career_lan_wins)} {p2.career_lan_wins}")
+    table.add_row("FNCS Titles", f"{arrow(p1.career_fncs_wins, p2.career_fncs_wins)} {p1.career_fncs_wins}", "│", f"{arrow(p2.career_fncs_wins, p1.career_fncs_wins)} {p2.career_fncs_wins}")
+    table.add_row("Total Major Wins",f"{arrow(total_major_wins(p1), total_major_wins(p2))} {total_major_wins(p1)}","│",f"{arrow(total_major_wins(p2), total_major_wins(p1))} {total_major_wins(p2)}")
+
+    table.add_row("Cash Cup Wins", f"{arrow(p1.career_cashcup_wins, p2.career_cashcup_wins)} {p1.career_cashcup_wins}", "│", f"{arrow(p2.career_cashcup_wins, p1.career_cashcup_wins)} {p2.career_cashcup_wins}")
+    table.add_row("Victory Cup Wins", f"{arrow(p1.career_victorycup_wins, p2.career_victorycup_wins)} {p1.career_victorycup_wins}", "│", f"{arrow(p2.career_victorycup_wins, p1.career_victorycup_wins)} {p2.career_victorycup_wins}")
+
+    table.add_row("🎯 BEST PLACEMENT", "—", "—", "—")
+    table.add_row("Best Finish", f"{arrow(p1.best_finish, p2.best_finish, higher_is_better=False)} #{p1.best_finish}", "│", f"{arrow(p2.best_finish, p1.best_finish, higher_is_better=False)} #{p2.best_finish}")
+
+    table.add_row("📈 DERIVED STATS", "—", "—", "—")
+    table.add_row("Top 5 Finishes", f"{arrow(top5(p1), top5(p2))} {top5(p1)}", "│", f"{arrow(top5(p2), top5(p1))} {top5(p2)}")
+    table.add_row("Top 10 Finishes", f"{arrow(top10(p1), top10(p2))} {top10(p1)}", "│", f"{arrow(top10(p2), top10(p1))} {top10(p2)}")
+    table.add_row("Dominance Score", f"{arrow(dominance(p1), dominance(p2))} {dominance(p1)}", "│", f"{arrow(dominance(p2), dominance(p1))} {dominance(p2)}")
+    table.add_row("Major/Minor Ratio", f"{arrow(major_ratio(p1), major_ratio(p2))} {major_ratio(p1):.2f}", "│", f"{arrow(major_ratio(p2), major_ratio(p1))} {major_ratio(p2):.2f}")
+    table.add_row("Earnings per Major", f"{arrow(earnings_per_major(p1), earnings_per_major(p2))} ${earnings_per_major(p1):,.0f}", "│", f"{arrow(earnings_per_major(p2), earnings_per_major(p1))} ${earnings_per_major(p2):,.0f}")
+    table.add_row(
+    "GOAT Index",
+    f"{arrow(get_goat_index(p1), get_goat_index(p2))} {get_goat_index(p1):,}",
+    "│",
+    f"{arrow(get_goat_index(p2), get_goat_index(p1))} {get_goat_index(p2):,}"
+)
+
+
+    console.print(table)
+    console.print("━" * 60)
+
 
 def show_player_history(players: List[Player]):
     sorted_players = sort_leaderboard(players)
     while True:
         user_input = input(
-            "\nEnter a placement number, player name, org name, "
-            "or 'career' for career leaderboard, "
-            "or 'season' for current season leaderboard, "
-            "or 'q' to quit: "
-        ).strip().lower()
+        "\nChoose an option:\n"
+        "  • [number]        → View player by rank\n"
+        "  • [player name]   → View player profile\n"
+        "  • [org name]      → View org page\n"
+        "  • career          → Career leaderboard\n"
+        "  • season          → Season leaderboard\n"
+        "  • goat            → 🐐 GOAT leaderboard\n"
+        "  • compare A B     → Compare two players\n"
+        "  • q               → Quit\n"
+        "> "
+    ).strip().lower()
+
 
         if user_input == 'q':
             break
+            
+        if user_input.startswith("compare"):
+            parts = user_input.split()
+
+            if len(parts) < 3:
+                print("Usage: compare <player1> <player2>")
+                continue
+
+            name1 = parts[1]
+            name2 = parts[2]
+
+            p1 = next((p for p in players if name1 in p.name.lower()), None)
+            p2 = next((p for p in players if name2 in p.name.lower()), None)
+
+            if not p1 or not p2:
+                print("One or both players not found.")
+                continue
+
+            compare_players(p1, p2)
+            continue
+            
+        if user_input == "goat":
+            goat_players = [p for p in sorted_players if hasattr(p, "career_earnings")]
+
+            if not goat_players:
+                print("No career data available yet.")
+                continue
+
+            goat_players.sort(key=get_goat_index, reverse=True)
+
+            table = Table(title="🐐 GOAT LEADERBOARD", show_header=True, header_style="bold")
+
+            table.add_column("Rank", justify="right", width=6)
+            table.add_column("Player", width=18)
+            table.add_column("GOAT Index", justify="right", width=12)
+            table.add_column("Majors", justify="right", width=8)
+            table.add_column("Earnings", justify="right", width=12)
+
+            for rank, p in enumerate(goat_players, 1):
+                majors = p.career_lan_wins + p.career_fncs_wins
+
+                table.add_row(
+                    str(rank),
+                    p.name,
+                    f"{get_goat_index(p):,}",
+                    str(majors),
+                    f"${p.career_earnings:,}"
+                )
+
+            console.print()
+            console.print(table)
+            continue
+
 
         if user_input == "career":
             career_players = [p for p in sorted_players if hasattr(p, "career_earnings")]
@@ -1784,6 +1964,7 @@ def show_player_history(players: List[Player]):
             table.add_column("Tournaments", justify="right")
             table.add_column("Kills", justify="right")
             table.add_column("Earnings", justify="right")
+            table.add_column("Career Tier", justify="right")
 
             for rank, p in enumerate(career_players, 1):
                 table.add_row(
@@ -1792,7 +1973,8 @@ def show_player_history(players: List[Player]):
                     str(p.career_wins),
                     str(p.career_tournaments),
                     str(p.career_kills),
-                    f"${p.career_earnings:,}"
+                    f"${p.career_earnings:,}",
+                    get_career_tier(p)
                 )
 
             console.print(table)
@@ -1899,17 +2081,35 @@ def show_player_history(players: List[Player]):
             console.print(table)
 
             if hasattr(player, "career_earnings"):
-                print(f"\n🏅 Career Stats for {player.name}")
-                print(f"Total Tournament Wins: {player.career_wins}")
-                print(f"Total Cash Cup Wins: {player.career_cashcup_wins}")
-                print(f"Total Victory Cup Game Wins: {player.career_victorycup_wins}")
-                print(f"Total FNCS Wins: {player.career_fncs_wins}")
-                print(f"Total LAN Wins: {player.career_lan_wins}")
-                print(f"Total Tournaments: {player.career_tournaments}")
-                print(f"Total Kills: {player.career_kills}")
-                print(f"Total Earnings: ${player.career_earnings:,}")
-                print(f"Best Finish: {player.best_finish}")
+                print(f"\n🏅 Career Stats — {player.name} (👑 {get_career_tier(player)})")
+                print("─" * 35)
 
+
+                print("🏆 MAJOR TOURNAMENT VICTORIES")
+                print(f"  LAN Titles:            {player.career_lan_wins:,}")
+                print(f"  FNCS Titles:           {player.career_fncs_wins:,}")
+                print(f"  Cash Cup Wins:         {player.career_cashcup_wins:,}")
+                print(f"  Victory Cup Game Wins: {player.career_victorycup_wins:,}")
+                print(f"  Overall Tournament Wins: {player.career_wins:,}")
+
+                print("\n📊 CAREER OVERVIEW")
+                print(f"  Tournaments Played:    {player.career_tournaments:,}")
+                print(f"  Career Eliminations:   {player.career_kills:,}")
+                print(f"  Career Earnings:       ${player.career_earnings:,}")
+                print(f"  Best Placement:        #{player.best_finish}")
+                               
+                
+                top_achievements = get_top_achievements(player)
+
+                if top_achievements:
+                    print("\n🏆 CAREER HIGHLIGHTS")
+                    print("─" * 35)
+                    for a in top_achievements:
+                        medal = {1: "🥇", 2: "🥈", 3: "🥉", 4: "#4", 5: "#5", 6: "#6", 7: "#7", 8: "#8", 9: "#9", 10: "#10"}.get(a["placement"], "•")
+                        t_label = TOURNAMENT_TYPES[a["type"]]["label"]
+                        print(f"{medal} {t_label} ({a['date']})")
+
+            print("─" * 35)
             if player.name in SEASON["season_players"]:
                 s = SEASON["season_players"][player.name]
                 print(f"\n📆 Season {SEASON['current_season']} Stats")
@@ -1917,6 +2117,75 @@ def show_player_history(players: List[Player]):
                 print(f"Season Wins: {s['wins']}")
                 print(f"Season Elims: {s['elims']}")
                 print(f"Season Earnings: ${s['earnings']:,}")
+
+
+def get_career_tier(player):
+    score = (
+        player.career_earnings / 250_000 +
+        player.career_wins * 3.0 +
+        player.career_lan_wins * 8.0 +
+        player.career_fncs_wins * 7.0 +
+        player.career_cashcup_wins * 1.25 +
+        player.career_tournaments * 0.1 +
+        player.career_kills / 1000
+    )
+
+    if score < 30:
+        return "Rookie"
+    elif score < 40:
+        return "Challenger"
+    elif score < 52:
+        return "Contender"
+    elif score < 70:
+        return "Elite"
+    elif score < 100:
+        return "Champion"
+    elif score < 150:
+        return "Legend"
+    else:
+        return "GOAT"
+
+
+def get_top_achievements(player, limit=6):
+    if not hasattr(player, "career_achievements"):
+        return []
+
+    def weight(a):
+        placement_scores = {1: 100, 2: 85, 3: 70, 4: 55, 5: 40}
+        score = placement_scores.get(a["placement"], max(0, 40 - (a["placement"] - 5) * 2))
+
+        type_multiplier = {
+            "LAN": 4,
+            "FNCS": 3,
+            "CASH_CUP": 1.0,
+            "VICTORY_CUP": 0.5
+        }
+        score *= type_multiplier.get(a["type"], 1.0)
+
+        return score
+
+    return sorted(
+        player.career_achievements,
+        key=weight,
+        reverse=True
+    )[:limit]
+
+def get_goat_index(p):
+    majors = p.career_lan_wins + p.career_fncs_wins
+
+    return round(
+        p.career_lan_wins * 120 +
+        p.career_fncs_wins * 90 +
+
+        p.career_wins * 8 +
+
+        sum(1 for a in getattr(p, "career_achievements", []) if a["placement"] <= 10) * 4 +
+
+        min(p.career_earnings / 100_000, 60) +
+
+        p.career_tournaments * 0.75,
+        2
+    )
 
 
 def export_tournament_results(players: List[Player], matches: int):
@@ -2086,7 +2355,6 @@ def main_menu():
         print("3. View Season History")
         print("4. Tournament Templates")
         print("5. Mods & Extras")
-        print("6. Patch Notes")
         print("0. Exit")
         print("━" * 50)
         
@@ -2155,9 +2423,6 @@ def main_menu():
                 
                 else:
                     print("Unknown command. Use t <number>, r, or b.")
-
-        elif choice == "6":
-            show_patch_notes()
         
         elif choice == "0":
             print("\nThanks for playing! See you next drop! 👋")
@@ -2165,108 +2430,6 @@ def main_menu():
             
         else:
             print("Invalid option.")
-
-
-def show_patch_notes():
-    print("\n" + "═" * 60)
-    print("📜  PATCH NOTES  –  Fortnite Tournament Simulator")
-    print("═" * 60)
-    print("Last updated: January 17, 2026")
-    print("")
-    
-    print("v1.1.3 - Small QOL Update (January 17, 2026)")
-    print("──────────────────────────────────────") 
-    print("✨ New")
-    print("• Tournament leaderboard TXTs have been updated and are now stored in its own folder instead")
-    print("• New season progress bar in the main menu")
-    print("• Season length increased from 12 → 16 tournaments")
-    print("• New toggleable win ticker, calculates probability of a player winning the tournament!")
-    print("")
-    print("🔧 Balance & Behaviour Tweaks")
-    print("• Player skill calibration pass:")
-    print(" Adjusted a small number of players' skill based on real, recent solo tournament results.")
-    print(" These changes affect consistency, not guaranteed outcomes.")
-    print(" Noticeable adjustments include:")
-    print("  • Upl (slight increase)")
-    print("  • Kombek (slight increase)")
-    print("  • Blacha (slight increase)")
-    print("  • Hris (slight increase)")
-    print("")
-    print("• Org roster changes:")
-    print("  • Darm & Demus joined T1")
-    print("")
-    
-     
-    print("v1.1.2 - (January 12, 2026)")
-    print("──────────────────────────────────────") 
-    print("✨ New")
-    print("• New mod: Rage Quit")
-    print(" - Players can rage quit and refuse to play the rest of the tournament!")
-    print(" - Occurs after enough bad placements or bad leaderboard placement")
-    print("• New Rage Quit themed splash texts")
-    print("• MVP quotes at the end of the season -- what does the MVP have to say?")
-    print("")
-    print("🔧 Balance & Behaviour Tweaks")
-    print("• Player skill calibration pass:")
-    print(" Adjusted a small number of players' skill based on real, recent solo tournament results.")
-    print(" These changes affect consistency, not guaranteed outcomes.")
-    print(" Noticeable adjustments include:")
-    print("  • Akiira (slight increase)")
-    print("  • Kurama (slight increase)")
-    print("  • Werex (slight increase)")
-    print("  • Seyyto (slight increase)")
-    print("  • Pixx (slight increase)")
-    print("  • Darm (slight increase)")
-    print("  • Demus (slight increase)")
-    print("  • IDrop (slight increase)")
-    print("  • t3eny (slight decrease)")  
-    print("")
-    print("🐛 Fixes")
-    print("• Prevented unintended stat carryover between matches")
-    print("• Fixed cases where rage quit players have extra matches added to history")
-    print("")
-    print("🔮 Looking Ahead")
-    print("• Major revamp of fight logic and engagements")
-    print("• Save files and deeper season persistence")
-    print("• Expanded regional player pools")
-    print("")
-    
-    
-    print("v1.1.1 Hotfix (January 10, 2026)")
-    print("──────────────────────────────────────")
-    print("• Fixed bug where crashed/no-loaded players would receive high placements")
-    print("• Added new splash texts")
-    print("• Org roster changes:")
-    print("  - Kami left Al Qadsiah")
-    print("  - Charyy left RVL")
-    print("  - Flickzy left Aight")
-    print("")
-    
-    print("v1.1.0 – Mods Update (January 9, 2026)")
-    print("──────────────────────────────────────")
-    print("• Complete mod system with toggle menu & descriptions")
-    print("• New mods added:")
-    print("  - Technical Issues (crashes/no-loads)")
-    print("  - Ping Difference (realistic ping swings)")
-    print("  - Stream Snipe (high-profile eliminations)")
-    print("  - Zero Build Flashback (chaotic no-build moments)")
-    print("• Fixed spawn-time crash/no-load placement bugs")
-    print("• Eliminated ghost fights from dead players")
-    print("• Improved MVP calculation (earnings prioritized)")
-    print("• Better broadcast feel with new spawn summaries")
-    print("")
-    
-    print("v1.0.0 – Initial Release (December 2025)")
-    print("──────────────────────────────────────")
-    print("• Full tournament simulation (FNCS, Cash Cup, LAN, Victory Cup)")
-    print("• Career stats, season tracking & history")
-    print("• Placement + elim points, prize pools, org tags")
-    print("• Dynamic commentary, top 10 standings & movement arrows")
-    print("• Configurable speed, templates & setup menu")
-    print("")
-    
-    print("═" * 60)
-    input("\nPress Enter to return to main menu...")
     
 
 def pre_tournament_menu():

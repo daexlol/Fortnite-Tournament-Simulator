@@ -24,7 +24,7 @@ DEFAULT_CONFIG = {
     "tournament_type": "FNCS",
     "show_win_tickers": True,
     "walkouts": False,
-    "version": "1.2.0",
+    "version": "1.2.1",
     "build": "Stable",
 }
 
@@ -125,6 +125,7 @@ ORG_TAGS = {
     "Soul Runner": "SR",
     "H1TMAN": "HTM",
     "Vertios": "VET",
+    "Virtus Pro": "VP",
     
     
 }
@@ -135,7 +136,7 @@ def display_name(player):
 
     tag = ORG_TAGS.get(player.org)
     if not tag:
-        return player.name  # fallback safety
+        return player.name
 
     return f"{tag} {player.name}"
 
