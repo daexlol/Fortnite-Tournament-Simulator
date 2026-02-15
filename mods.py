@@ -4,6 +4,7 @@ if __name__ == "__main__":
 import random
 from utils import display_name, Colors, sim_sleep, CONFIG
 
+
 class Mod:
     name = "BaseMod"
     enabled = False
@@ -41,7 +42,7 @@ class TechnicalIssuesMod(Mod):
             player.alive = False
             return "CRASH"
         return None
-        
+
 
 class RageQuitMod(Mod):
     name = "Rage Quit"
@@ -78,7 +79,7 @@ class RageQuitMod(Mod):
                     print(f"   └─ Tilted after {len(streak)} bad games (avg: {avg_bad:.1f})")
                     sim_sleep(1.5)
                     p._has_rage_quit = True
-                    
+
                     remaining_games = CONFIG["matches"] - len(p.placements)
 
 
@@ -124,3 +125,99 @@ class PingDiffMod(Mod):
                 else:
                     p.skill = min(200, p.skill * 1.18)
         return True
+
+
+class ClutchFactorMod(Mod):
+    name = "Clutch Factor"
+    description = "Players either rise to pressure or completely fold"
+
+    def __init__(self):
+        self.player_clutch_genes = {}
+        self.current_match = 0
+        self.alive_tracking = {}
+
+    def on_tournament_start(self, players, config):
+        if not self.enabled:
+            return
+        clutch_count = 0
+        choke_count = 0
+        for p in players:
+            if p.id not in self.player_clutch_genes:
+                roll = random.random()
+                if roll < 0.25:
+                    self.player_clutch_genes[p.id] = "CLUTCH"
+                    clutch_count += 1
+                elif roll < 0.50:
+                    self.player_clutch_genes[p.id] = "CHOKER"
+                    choke_count += 1
+                else:
+                    self.player_clutch_genes[p.id] = "NORMAL"
+
+        print(
+            f"{Colors.SOFT_CYAN}🎲 Clutch Factor initialized: {clutch_count} clutch players, {choke_count} chokers{Colors.RESET}")
+        sim_sleep(1)
+
+    def on_match_start(self, players, match_number, config):
+        if not self.enabled:
+            return
+        self.current_match = match_number
+        self.alive_tracking = {p.id: True for p in players if p.alive}
+
+    def on_fight(self, attacker, defender, config):
+        if not self.enabled:
+            return True
+
+        alive_count = len(self.alive_tracking)
+        total_matches = config.get("matches", 12)
+
+        for p in [attacker, defender]:
+            gene = self.player_clutch_genes.get(p.id, "NORMAL")
+
+            if gene == "NORMAL":
+                continue
+
+            is_pressure = False
+            pressure_type = ""
+
+            if alive_count <= 15 and alive_count > 1:
+                is_pressure = True
+                pressure_type = "ENDGAME"
+
+            if self.current_match >= total_matches - 2:
+                is_pressure = True
+                pressure_type = "FINALS"
+
+            if is_pressure and random.random() < 0.25:
+                if gene == "CLUTCH":
+                    p.skill = min(200, p.skill * 1.30)
+                    p.confidence = min(2.0, p.confidence * 1.12)
+                    if random.random() < 0.2:
+                        print(
+                            f"{Colors.SOFT_GREEN + Colors.BOLD}💎 {display_name(p)} is LOCKED IN! ({pressure_type}){Colors.RESET}")
+                        sim_sleep(0.25)
+
+                elif gene == "CHOKER":
+                    p.skill = max(1, p.skill * 0.68)
+                    p.confidence = max(0.1, p.confidence * 0.82)
+                    if random.random() < 0.2:
+                        print(
+                            f"{Colors.SOFT_RED}😰 {display_name(p)} is feeling the pressure... ({pressure_type}){Colors.RESET}")
+                        sim_sleep(0.25)
+
+        return True
+
+    def on_player_eliminated(self, victim, killer, config):
+        if not self.enabled:
+            return
+
+        if victim.id in self.alive_tracking:
+            del self.alive_tracking[victim.id]
+
+        alive_count = len(self.alive_tracking)
+        gene = self.player_clutch_genes.get(killer.id, "NORMAL")
+
+        if alive_count <= 10 and alive_count > 1 and gene == "CLUTCH" and random.random() < 0.15:
+            print(
+                f"{Colors.GOLD + Colors.BOLD}⭐ {display_name(killer)} with the CLUTCH ELIM! (Top {alive_count}){Colors.RESET}")
+            killer.confidence = min(2.0, killer.confidence * 1.18)
+            sim_sleep(0.25)
