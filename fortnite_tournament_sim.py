@@ -1072,11 +1072,11 @@ def update_social_data(players: List[Player]):
             rival_key = rival.name
             current_rivalry = social_data["rivalries"][p_key].get(rival_key, 0.0)
 
-            decay_rate = 0.75
+            decay_rate = 0.5
             decayed_rivalry = current_rivalry * decay_rate
 
             new_rivalry = decayed_rivalry + (hatred * 0.5)
-            new_rivalry = min(20.0, new_rivalry)
+            new_rivalry = min(3.0, new_rivalry)
 
             if new_rivalry >= 1.0:
                 social_data["rivalries"][p_key][rival_key] = round(new_rivalry, 2)
