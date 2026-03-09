@@ -26,9 +26,10 @@ DEFAULT_CONFIG = {
     "walkouts": False,
     "killfeed_highlights": False,
     "archetype_switching": True,
-    "version": "1.3.0",
-    "build": "Stable",
+    "version": "1.4.0",
+    "build": "Rivalry & Strategy Update",
 }
+
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
@@ -46,19 +47,22 @@ def load_config():
         save_config(DEFAULT_CONFIG)
         return DEFAULT_CONFIG.copy()
 
+
 def save_config(config):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
 
+
 CONFIG = load_config()
 
-
 MODS_FILE = os.path.join(DATA_DIR, "active_mods.json")
+
 
 def save_active_mods(mods):
     data = [{"name": mod.name, "enabled": mod.enabled} for mod in mods]
     with open(MODS_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+
 
 def load_active_mods(all_mods):
     if not os.path.exists(MODS_FILE):
@@ -79,15 +83,15 @@ def load_active_mods(all_mods):
         return all_mods
 
 
-
-
 ORG_TAGS = {
     "Gentle Mates": "M8",
     "Falcons": "Falcon",
     "BIG": "BIG",
-    "Vitality": "VIT",
+    "Vitality": "Vitality",
     "AG Global": "AG",
+    "Liquid": "Liquid",
     "Solary": "Solary",
+    "GLORE": "GLORE",
     "HavoK": "HvK",
     "Atlantic": "Atlantic",
     "Al Qadsiah": "QAD",
@@ -133,8 +137,11 @@ ORG_TAGS = {
     "Quantum": "QTE",
     "GameWard": "GW",
     "XP42": "XP42",
-    
+    "OneProdige": "1P",
+    "PTH": "PTH",
+
 }
+
 
 def display_name(player):
     if player.org == "Free Agent":
@@ -146,24 +153,25 @@ def display_name(player):
 
     return f"{tag} {player.name}"
 
+
 class Colors:
     RESET = "\033[0m"
     BOLD = "\033[1m"
     DIM = "\033[2m"
     ITALIC = "\033[3m"
-    
-    SOFT_RED     = "\033[38;2;255;102;102m"
-    SOFT_GREEN   = "\033[38;2;102;204;102m"
-    SOFT_YELLOW  = "\033[38;2;255;204;102m"
-    SOFT_BLUE    = "\033[38;2;102;153;255m"
-    SOFT_PURPLE  = "\033[38;2;204;153;255m"
-    SOFT_CYAN    = "\033[38;2;102;204;204m"
-    
-    LIGHT_GRAY   = "\033[38;2;150;150;150m"
+
+    SOFT_RED = "\033[38;2;255;102;102m"
+    SOFT_GREEN = "\033[38;2;102;204;102m"
+    SOFT_YELLOW = "\033[38;2;255;204;102m"
+    SOFT_BLUE = "\033[38;2;102;153;255m"
+    SOFT_PURPLE = "\033[38;2;204;153;255m"
+    SOFT_CYAN = "\033[38;2;102;204;204m"
+
+    LIGHT_GRAY = "\033[38;2;150;150;150m"
     VERY_LIGHT_GRAY = "\033[38;2;230;230;235m"
-    WARM_WHITE   = "\033[38;2;245;245;240m"
-    
-    BORDER_BLUE  = "\033[38;2;150;180;220m"
+    WARM_WHITE = "\033[38;2;245;245;240m"
+
+    BORDER_BLUE = "\033[38;2;150;180;220m"
 
     GOLD = "\033[38;2;255;215;0m"
     SOFT_GOLD = "\033[38;2;240;200;100m"

@@ -38,6 +38,7 @@ REGION_DATA_DIR = os.path.join(DATA_DIR, REGION)
 os.makedirs(REGION_DATA_DIR, exist_ok=True)
 CAREER_FILE = os.path.join(REGION_DATA_DIR, "career_stats.json")
 SEASON_FILE = os.path.join(REGION_DATA_DIR, "season_data.json")
+SOCIAL_FILE = os.path.join(REGION_DATA_DIR, "social_data.json")
 SPLASH_FILE = "splash.txt"
 SEASON = {
     "current_season": 1,
@@ -84,38 +85,52 @@ def list_saves():
         if os.path.isdir(save_path):
             info = {
                 "name": save_name,
-                "tournaments": 0,
-                "season": 1,
-                "region": "Unknown",
+                "regions": {},
                 "last_played": "Never"
             }
 
-            for region in ["eu", "na", "br", "oce"]:
+            for region in ["eu", "na", "br", "oce", "mixed"]:
                 region_dir = os.path.join(save_path, region)
                 career_file = os.path.join(region_dir, "career_stats.json")
                 season_file = os.path.join(region_dir, "season_data.json")
 
-                if os.path.exists(career_file):
-                    try:
-                        with open(career_file, "r") as f:
-                            career_data = json.load(f)
-                            if career_data:
-                                first_player = list(career_data.values())[0]
-                                info["tournaments"] = first_player.get("tournaments", 0)
-                                info["region"] = region.upper()
-                    except:
-                        pass
+                if os.path.exists(career_file) or os.path.exists(season_file):
+                    region_info = {
+                        "tournaments": 0,
+                        "season": 1,
+                        "last_played": "Never"
+                    }
 
-                if os.path.exists(season_file):
-                    try:
-                        with open(season_file, "r") as f:
-                            season_data = json.load(f)
-                            info["season"] = season_data.get("current_season", 1)
+                    if os.path.exists(career_file):
+                        try:
+                            with open(career_file, "r") as f:
+                                career_data = json.load(f)
+                                if career_data:
+                                    first_player = list(career_data.values())[0]
+                                    region_info["tournaments"] = first_player.get("tournaments", 0)
+                        except:
+                            pass
+
+                    if os.path.exists(season_file):
+                        try:
+                            with open(season_file, "r") as f:
+                                season_data = json.load(f)
+                                region_info["season"] = season_data.get("current_season", 1)
 
                             mtime = os.path.getmtime(season_file)
-                            info["last_played"] = datetime.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
-                    except:
-                        pass
+                            region_info["last_played"] = datetime.datetime.fromtimestamp(mtime).strftime(
+                                "%Y-%m-%d %H:%M")
+                        except:
+                            pass
+
+                    info["regions"][region.upper()] = region_info
+
+            if info["regions"]:
+                most_recent = max(
+                    info["regions"].values(),
+                    key=lambda x: x["last_played"]
+                )
+                info["last_played"] = most_recent["last_played"]
 
             saves.append(info)
 
@@ -255,20 +270,20 @@ PRO_PLAYER_POOLS = {
         ("PabloWingu", 108, "Aggressive", "HavoK"),
         ("Chap", 108, "Fragger", "Free Agent"),
         ("Shxrk", 107, "Fragger", "BIG"),
-        ("Scroll", 104, "Strategist", "Atlantic"),
-        ("Th0masHD", 103, "Strategist", "Virtus Pro"),
+        ("Scroll", 106, "Strategist", "Atlantic"),
+        ("Th0masHD", 104, "Strategist", "Virtus Pro"),
         ("Kami", 109, "Rat", "Free Agent"),
         ("Chico", 101, "Strategist", "Free Agent"),
         ("Charyy", 104, "Passive", "Free Agent"),
-        ("Japko", 104, "Fragger", "Falcons"),
-        ("Queasy", 103, "Rat", "Vitality"),
+        ("Japko", 105, "Fragger", "Free Agent"),
+        ("Queasy", 102, "Rat", "Vitality"),
         ("Flickzy", 105, "Aggressive", "Free Agent"),
         ("P1ngfnz", 100, "Fragger", "Free Agent"),
-        ("Malibuca", 105, "Strategist", "BIG"),
+        ("Malibuca", 106, "Strategist", "BIG"),
         ("Vanyak3k", 105, "Passive", "Gentle Mates"),
         ("Fredoxie", 103, "Strategist", "Free Agent"),
         ("MrSavage", 101, "Aggressive", "XSET"),
-        ("Sky", 100, "Strategist", "Atlantic"),
+        ("Sky", 105, "Strategist", "Atlantic"),
         ("t3eny", 106, "Aggressive", "Free Agent"),
         ("Trulex", 98, "Strategist", "Free Agent"),
         ("Tayson", 100, "Strategist", "Free Agent"),
@@ -278,12 +293,12 @@ PRO_PLAYER_POOLS = {
         ("Panzer", 98, "Strategist", "Free Agent"),
         ("Nebs", 90, "Strategist", "Free Agent"),
         ("Vadeal", 87, "Passive", "WAVE"),
-        ("Focus", 86, "Fragger", "Virtus Pro"),
+        ("Focus", 100, "Fragger", "Virtus Pro"),
         ("Akiira", 97, "Fragger", "Gentle Mates"),
-        ("Rax", 96, "Fragger", "Free Agent"),
+        ("Rax", 99, "Fragger", "Free Agent"),
         ("Kurama", 99, "Fragger", "Solary"),
         ("Werex", 98, "Strategist", "Lyost"),
-        ("Seyyto", 94, "Strategist", "K13"),
+        ("Seyyto", 94, "Strategist", "Free Agent"),
         ("Kiro", 86, "Strategist", "Free Agent"),
         ("Podasai", 85, "Strategist", "Free Agent"),
         ("Momsy", 89, "Strategist", "Lyost"),
@@ -306,7 +321,7 @@ PRO_PLAYER_POOLS = {
         ("Blacha", 78, "Passive", "Free Agent"),
         ("Hris", 77, "Fragger", "Free Agent"),
         ("Ankido", 71, "Strategist", "BIG"),
-        ("Cringe", 70, "Strategist", "AVE"),
+        ("Cringe", 70, "Strategist", "XP42"),
         ("Volko", 69, "Strategist", "BIG"),
         ("JannisZ", 78, "Passive", "CGN"),
         ("Pinq", 75, "Passive", "Free Agent"),
@@ -345,6 +360,18 @@ PRO_PLAYER_POOLS = {
         ("Refsgaard", 78, "Strategist", "Free Agent"),
         ("Nxthan", 77, "Fragger", "Free Agent"),
         ("Juu", 76, "Strategist", "FataL"),
+        ("Cheatiin", 93, "Fragger", "Aight"),
+        ("Trexer", 90, "Fragger", "Aight"),
+        ("Ghost", 85, "Strategist", "Free Agent"),
+        ("Kaan", 85, "Aggressive", "Free Agent"),
+        ("Faded", 85, "Strategist", "Free Agent"),
+        ("SShur4", 79, "Strategist", "Free Agent"),
+        ("Repairs", 79, "Strategist", "Free Agent"),
+        ("Prax", 87, "Aggressive", "PTH"),
+        ("Hyper", 80, "Fragger", "OneProdige"),
+        ("Julle", 81, "Strategist", "Free Agent"),
+        ("Minori", 82, "Strategist", "Solary"),
+        ("Darkos", 81, "Strategist", "Solary"),
     ],
 
     "NA": [
@@ -355,8 +382,8 @@ PRO_PLAYER_POOLS = {
         ('Higgs', 107, 'Aggressive', 'XSET'),
         ('Eomzo', 107, 'Strategist', 'Elite'),
         ('Muz', 106, 'Fragger', 'XSET'),
-        ('Rapid', 106, 'Strategist', 'Xen'),
-        ('Ritual', 105, 'Fragger', 'Gen.G'),
+        ('Rapid', 106, 'Strategist', 'Twisted Minds'),
+        ('Ritualx', 105, 'Fragger', 'Gen.G'),
         ('Boltz', 105, 'Aggressive', 'Twisted Minds'),
         ('Clix', 104, 'Fragger', 'XSET'),
         ('Sphinx', 104, 'Passive', 'Free Agent'),
@@ -386,7 +413,7 @@ PRO_PLAYER_POOLS = {
         ('Curve', 74, 'Aggressive', 'Free Agent'),
         ('oSydd', 74, 'Fragger', 'Free Agent'),
         ('Visxals', 73, 'Strategist', 'Free Agent'),
-        ('Vergo', 73, 'Strategist', 'Rising Legends'),
+        ('Vergo', 73, 'Strategist', 'Void'),
         ('Parz', 72, 'Passive', 'Free Agent'),
         ('Seek', 72, 'Aggressive', 'Free Agent'),
         ('Bacca', 71, 'Fragger', 'Free Agent'),
@@ -467,24 +494,24 @@ PRO_PLAYER_POOLS = {
         ("Wox", 107, "Strategist", "HavoK"),
         ("Muz", 106, "Fragger", "XSET"),
         ("Pixie", 106, "Fragger", "HavoK"),
-        ("Rapid", 106, "Strategist", "Xen"),
+        ("Rapid", 106, "Strategist", "Twisted Minds"),
         ("t3eny", 106, "Aggressive", "Free Agent"),
         ("Boltz", 105, "Aggressive", "Twisted Minds"),
         ("Flickzy", 105, "Aggressive", "Free Agent"),
-        ("Malibuca", 105, "Strategist", "BIG"),
+        ("Malibuca", 106, "Strategist", "BIG"),
         ("MariusCOW", 105, "Aggressive", "Gentle Mates"),
-        ("Ritual", 105, "Fragger", "Gen.G"),
+        ("Ritualx", 105, "Fragger", "Gen.G"),
         ("Vanyak3k", 105, "Passive", "Gentle Mates"),
         ("Charyy", 104, "Passive", "Free Agent"),
         ("Clix", 104, "Fragger", "XSET"),
         ("IDrop", 104, "Fragger", "HavoK"),
-        ("Japko", 104, "Fragger", "Falcons"),
-        ("Scroll", 104, "Strategist", "Atlantic"),
+        ("Japko", 104, "Fragger", "Free Agent"),
+        ("Scroll", 106, "Strategist", "Atlantic"),
         ("Sphinx", 104, "Passive", "Free Agent"),
         ("Acorn", 103, "Rat", "Twisted Minds"),
         ("Fredoxie", 103, "Strategist", "Free Agent"),
         ("Khanada", 103, "Fragger", "Dignitas"),
-        ("Queasy", 103, "Rat", "Vitality"),
+        ("Queasy", 102, "Rat", "Vitality"),
         ("Th0masHD", 103, "Strategist", "Virtus Pro"),
         ("Ark", 102, "Fragger", "Dignitas"),
         ("Cooper", 102, "Fragger", "Dignitas"),
@@ -499,7 +526,7 @@ PRO_PLAYER_POOLS = {
         ("P1ngfnz", 100, "Fragger", "Free Agent"),
         ("Reet", 100, "Strategist", "Free Agent"),
         ("Shadow", 100, "Fragger", "Free Agent"),
-        ("Sky", 100, "Strategist", "Atlantic"),
+        ("Sky", 105, "Strategist", "Atlantic"),
         ("Tayson", 100, "Strategist", "Free Agent"),
         ("GMoney", 99, "Fragger", "2AM"),
         ("Kurama", 99, "Fragger", "Solary"),
@@ -513,7 +540,7 @@ PRO_PLAYER_POOLS = {
         ("EpikWhale", 95, "Strategist", "Free Agent"),
         ("Mero", 95, "Fragger", "Xen"),
         ("Rezon", 95, "Fragger", "WAVE"),
-        ("Seyyto", 94, "Strategist", "K13"),
+        ("Seyyto", 94, "Strategist", "Free Agent"),
         ("Bucke", 93, "Strategist", "Dignitas"),
         ("Demus", 92, "Fragger", "T1"),
         ("Darm", 90, "Fragger", "T1"),
@@ -524,7 +551,7 @@ PRO_PLAYER_POOLS = {
         ("Noxy", 87, "Passive", "Free Agent"),
         ("Vadeal", 87, "Passive", "WAVE"),
         ("Andilex", 86, "Fragger", "MGA"),
-        ("Focus", 86, "Fragger", "Virtus Pro"),
+        ("Focus", 100, "Fragger", "Virtus Pro"),
         ("Kiro", 86, "Strategist", "Free Agent"),
         ("Braydz", 85, "Fragger", "Free Agent"),
         ("Podasai", 85, "Strategist", "Free Agent"),
@@ -538,7 +565,7 @@ PRO_PLAYER_POOLS = {
         ("Curve", 74, "Aggressive", "Free Agent"),
         ("Deyy", 74, "Aggressive", "Free Agent"),
         ("oSydd", 74, "Fragger", "Free Agent"),
-        ("Vergo", 73, "Strategist", "Rising Legends"),
+        ("Vergo", 73, "Strategist", "Void"),
         ("Visxals", 73, "Strategist", "Free Agent"),
         ("Parz", 72, "Passive", "Free Agent"),
         ("Seek", 72, "Aggressive", "Free Agent"),
@@ -807,12 +834,17 @@ class Player:
 
     rivals: dict = field(default_factory=dict)
     fear: dict = field(default_factory=dict)
+    friends: set = field(default_factory=set)
 
     _has_rage_quit: bool = field(default=False)
 
     original_archetype: str = ""
     current_archetype: str = ""
     has_switched_archetype: bool = False
+
+    loot: float = 0.0
+    contested_drop: bool = False
+    time_since_fight: int = 0
 
     def add_match_result(self, placement, elims, points):
         self.total_points += points
@@ -856,21 +888,34 @@ def update_confidence(players: List[Player]):
     for idx, p in enumerate(ranked):
         percentile = idx / total
 
-        p.confidence *= 0.9
+        decay_rate = 0.9
+        if p.skill >= 100:
+            decay_rate = 0.92
+
+        p.confidence *= decay_rate
 
         if percentile < 0.05:
-            p.confidence += 0.05
+            p.confidence += 0.055
         elif percentile < 0.15:
             p.confidence += 0.03
         elif percentile < 0.30:
             p.confidence += 0.015
 
         elif percentile > 0.95:
-            p.confidence -= 0.06
+            penalty = 0.05
+            if p.skill >= 100:
+                penalty = 0.035
+            p.confidence -= penalty
         elif percentile > 0.85:
-            p.confidence -= 0.035
+            penalty = 0.035
+            if p.skill >= 100:
+                penalty = 0.025
+            p.confidence -= penalty
         elif percentile > 0.70:
-            p.confidence -= 0.02
+            penalty = 0.02
+            if p.skill >= 100:
+                penalty = 0.015
+            p.confidence -= penalty
 
         p.confidence = max(-1.0, min(1.0, p.confidence))
 
@@ -888,6 +933,21 @@ def save_season():
     with open(SEASON_FILE, "w", encoding="utf-8") as f:
         json.dump(SEASON, f, indent=2)
     create_backup(SEASON_FILE, "season_data")
+
+
+def load_social_data():
+    """Load friendships and rivalries from social_data.json"""
+    if os.path.exists(SOCIAL_FILE):
+        with open(SOCIAL_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {"friendships": {}, "rivalries": {}}
+
+
+def save_social_data(social_data):
+    """Save friendships and rivalries to social_data.json"""
+    with open(SOCIAL_FILE, "w", encoding="utf-8") as f:
+        json.dump(social_data, f, indent=2)
+    create_backup(SOCIAL_FILE, "social_data")
 
 
 def create_backup(source_file, backup_prefix, max_backups=20):
@@ -946,6 +1006,83 @@ def load_career_data(players: List[Player]):
             p.career_victorycup_wins = stats.get("victorycup_wins", 0)
             p.best_finish = stats.get("best_finish", 999)
             p.career_achievements = stats.get("achievements", [])
+
+
+def update_social_data(players: List[Player]):
+    """Update friendships and rivalries based on tournament outcomes"""
+    social_data = load_social_data()
+
+    if "friendships" not in social_data:
+        social_data["friendships"] = {}
+    if "rivalries" not in social_data:
+        social_data["rivalries"] = {}
+
+    id_to_player = {p.id: p for p in players}
+
+    for p in players:
+        p_key = p.name
+
+        if p_key not in social_data["friendships"]:
+            social_data["friendships"][p_key] = {}
+        if p_key not in social_data["rivalries"]:
+            social_data["rivalries"][p_key] = {}
+
+        for friend_id in p.friends:
+            friend = id_to_player.get(friend_id)
+            if not friend:
+                continue
+
+            friend_key = friend.name
+            current_strength = social_data["friendships"][p_key].get(friend_key, 1.0)
+
+            killed_friend = p.rivals.get(friend_id, 0) > 0
+
+            placement_diff = abs(p.final_placement - friend.final_placement) if hasattr(p,
+                                                                                        'final_placement') and hasattr(
+                friend, 'final_placement') else 0
+            both_good = (hasattr(p, 'final_placement') and hasattr(friend, 'final_placement') and
+                         p.final_placement <= 10 and friend.final_placement <= 10)
+            both_bad = (hasattr(p, 'final_placement') and hasattr(friend, 'final_placement') and
+                        p.final_placement > 50 and friend.final_placement > 50)
+
+            if killed_friend:
+                current_strength -= 0.15
+            elif both_good:
+                current_strength += 0.08
+            elif both_bad:
+                current_strength += 0.05
+            elif placement_diff > 40:
+                current_strength -= 0.05
+            else:
+                current_strength += 0.02
+
+            current_strength = max(0.0, min(2.0, current_strength))
+
+            if current_strength < 0.3:
+                if friend_key in social_data["friendships"][p_key]:
+                    del social_data["friendships"][p_key][friend_key]
+            else:
+                social_data["friendships"][p_key][friend_key] = round(current_strength, 2)
+
+        for rival_id, hatred in p.rivals.items():
+            rival = id_to_player.get(rival_id)
+            if not rival:
+                continue
+
+            rival_key = rival.name
+            current_rivalry = social_data["rivalries"][p_key].get(rival_key, 0.0)
+
+            decay_rate = 0.75
+            decayed_rivalry = current_rivalry * decay_rate
+
+            new_rivalry = max(decayed_rivalry, hatred)
+
+            if new_rivalry >= 1.0:
+                social_data["rivalries"][p_key][rival_key] = round(new_rivalry, 2)
+            elif rival_key in social_data["rivalries"][p_key]:
+                del social_data["rivalries"][p_key][rival_key]
+
+    save_social_data(social_data)
 
 
 def save_career_data(players: List[Player]):
@@ -1441,25 +1578,109 @@ def update_tournament_context(players: List[Player]):
 
 def update_player_strategy(player: Player, match_number: int):
     pressure = match_number / CONFIG["matches"]
+    total_games = CONFIG["matches"]
+    games_remaining = total_games - match_number
+    is_crunch_time = (games_remaining <= 2)
 
     risk = 0.4
 
-    if player.points_to_first > 40:
-        risk += 0.2
+    if is_crunch_time and player.current_rank <= 10:
+        gap_to_first = player.points_to_first
+        gap_to_below = player.points_to_below
+        gap_from_above = player.points_to_above
 
-    if 0 < player.points_to_first <= 30:
-        risk += 0.35
+        intensity_multiplier = 1.0 if games_remaining == 0 else 0.7
 
-    if player.safety_margin >= 60:
-        player.grief_bias = 0.7
-        risk += 0.15
-    elif player.safety_margin <= 15:
-        player.grief_bias = 0.1
-        risk -= 0.2
+        if player.current_rank == 1:
+            if gap_to_below >= 40:
+                risk = 0.25
+                player.grief_bias = 0.1 * intensity_multiplier
+            elif gap_to_below >= 20:
+                risk = 0.35
+                player.grief_bias = 0.2 * intensity_multiplier
+            else:
+                risk = 0.5
+                player.grief_bias = 0.4 * intensity_multiplier
+
+        elif player.current_rank == 2:
+            if gap_to_first >= 100:
+                risk = 1.0
+                player.grief_bias = 1.2 * intensity_multiplier
+            elif gap_to_first >= 70:
+                if gap_to_below >= 50:
+                    risk = 0.95
+                    player.grief_bias = 1.3 * intensity_multiplier
+                elif gap_to_below >= 20:
+                    risk = 0.8
+                    player.grief_bias = 0.8 * intensity_multiplier
+                else:
+                    risk = 0.65
+                    player.grief_bias = 0.5 * intensity_multiplier
+            elif gap_to_first >= 40:
+                if gap_to_below >= 30:
+                    risk = 0.85
+                    player.grief_bias = 0.9 * intensity_multiplier
+                else:
+                    risk = 0.7
+                    player.grief_bias = 0.6 * intensity_multiplier
+            else:
+                risk = 0.75
+                player.grief_bias = 0.7 * intensity_multiplier
+
+        elif 3 <= player.current_rank <= 5:
+            if gap_to_first >= 60:
+                risk = 0.9
+                player.grief_bias = 0.8 * intensity_multiplier
+            elif gap_to_first >= 30:
+                risk = 0.75
+                player.grief_bias = 0.6 * intensity_multiplier
+            else:
+                risk = 0.65
+                player.grief_bias = 0.5 * intensity_multiplier
+
+        elif 6 <= player.current_rank <= 10:
+            prize_cutoff_distance = abs(player.current_rank - 10)
+            if prize_cutoff_distance <= 2:
+                if gap_to_below <= 15:
+                    risk = 0.5
+                    player.grief_bias = 0.3 * intensity_multiplier
+                else:
+                    risk = 0.65
+                    player.grief_bias = 0.4 * intensity_multiplier
+            else:
+                risk = 0.7
+                player.grief_bias = 0.5 * intensity_multiplier
+
+    elif is_crunch_time and 11 <= player.current_rank <= 30:
+        intensity_multiplier = 1.0 if games_remaining == 0 else 0.7
+        gap_to_prize = player.current_rank - 10
+        if gap_to_prize <= 5 and player.points_to_above <= 25:
+            risk = 0.85
+            player.grief_bias = 0.6 * intensity_multiplier
+        elif gap_to_prize <= 10 and player.points_to_above <= 40:
+            risk = 0.75
+            player.grief_bias = 0.5 * intensity_multiplier
+        else:
+            risk = 0.6
+            player.grief_bias = 0.3 * intensity_multiplier
+
     else:
-        player.grief_bias = 0.3
+        if player.points_to_first > 40:
+            risk += 0.2
 
-    risk += pressure * 0.25
+        if 0 < player.points_to_first <= 30:
+            risk += 0.35
+
+        if player.safety_margin >= 60:
+            player.grief_bias = 0.7
+            risk += 0.15
+        elif player.safety_margin <= 15:
+            player.grief_bias = 0.1
+            risk -= 0.2
+        else:
+            player.grief_bias = 0.3
+
+        risk += pressure * 0.25
 
     player.risk_tolerance = max(0.2, min(1.0, risk))
 
@@ -1472,14 +1693,51 @@ def choose_attacker(players):
     return random.choices(players, weights=weights, k=1)[0]
 
 
-def choose_target(attacker, players):
+def choose_target(attacker, players, match_number=1, config=None):
     targets = [p for p in players if p != attacker]
 
+    max_rivalry = 0
+    most_hated = None
+    for t in targets:
+        hatred = attacker.rivals.get(t.id, 0)
+        if hatred > max_rivalry:
+            max_rivalry = hatred
+            most_hated = t
+
+    if max_rivalry >= 5:
+        toxic_threshold = 0.15 + (max_rivalry - 5) * 0.08
+        if random.random() < min(0.65, toxic_threshold):
+            return most_hated
+
     weights = []
+    is_crunch_time = match_number >= (config.get("matches", 12) - 2) if config else False
+    social_data = load_social_data()
+
     for t in targets:
         w = t.skill
 
-        if attacker.grief_bias > 0 and t.current_rank < attacker.current_rank:
+        is_friend = t.id in attacker.friends
+        friendship_strength = 1.0
+
+        if is_friend:
+            friendship_strength = social_data.get("friendships", {}).get(attacker.name, {}).get(t.name, 1.0)
+
+        if is_friend and not is_crunch_time:
+            if friendship_strength >= 1.5:
+                w *= 0.25
+            elif friendship_strength >= 1.0:
+                w *= 0.4
+            else:
+                w *= 0.6
+        elif is_friend and is_crunch_time and attacker.grief_bias < 0.8:
+            if friendship_strength >= 1.5:
+                w *= 0.5
+            else:
+                w *= 0.7
+
+        if attacker.grief_bias > 0.8 and t.current_rank == 1:
+            w *= (1 + attacker.grief_bias * 3.0)
+        elif attacker.grief_bias > 0 and t.current_rank < attacker.current_rank:
             w *= (1 + attacker.grief_bias)
 
         hatred = attacker.rivals.get(t.id, 0)
@@ -1496,9 +1754,53 @@ def choose_target(attacker, players):
     return random.choices(targets, weights=weights, k=1)[0]
 
 
-def register_elim(killer: Player, victim: Player):
-    killer.rivals[victim.id] = killer.rivals.get(victim.id, 0) + 1
+def register_elim(killer: Player, victim: Player, match_number: int = 1):
+    base_rivalry = random.uniform(0.8, 1.3)
 
+    are_friends = victim.id in killer.friends
+    friendship_strength = 1.0
+
+    if are_friends:
+        social_data = load_social_data()
+        friendship_strength = social_data.get("friendships", {}).get(killer.name, {}).get(victim.name, 1.0)
+
+    did_emote = random.random() < 0.12
+    if did_emote:
+        base_rivalry += random.uniform(2.0, 3.5)
+        if random.random() < 0.1:
+            emote_messages = [
+                f"{Colors.ITALIC}💀 {display_name(killer)} hits the emote on {display_name(victim)}!{Colors.RESET}",
+                f"{Colors.ITALIC}🕺 {display_name(killer)} is dancing... {display_name(victim)} won't forget that.{Colors.RESET}",
+                f"{Colors.ITALIC}😤 {display_name(killer)} with the disrespectful emote on {display_name(victim)}!{Colors.RESET}",
+            ]
+            print(random.choice(emote_messages))
+
+    skill_gap = victim.skill - killer.skill
+    if skill_gap >= 15:
+        base_rivalry += random.uniform(1.5, 2.5)
+    elif skill_gap >= 10:
+        base_rivalry += random.uniform(0.8, 1.5)
+
+    if victim.current_rank <= 3:
+        base_rivalry += random.uniform(1.2, 2.0)
+    elif victim.current_rank <= 10:
+        base_rivalry += random.uniform(0.6, 1.2)
+    elif victim.current_rank <= 20 and victim.points_to_above <= 30:
+        base_rivalry += random.uniform(0.5, 1.0)
+
+    is_crunch_time = match_number >= 10
+    if is_crunch_time:
+        base_rivalry *= 1.3
+
+    if are_friends:
+        if friendship_strength >= 1.5:
+            base_rivalry *= 0.25
+        elif friendship_strength >= 1.0:
+            base_rivalry *= 0.35
+        else:
+            base_rivalry *= 0.5
+
+    killer.rivals[victim.id] = killer.rivals.get(victim.id, 0) + base_rivalry
     victim.fear[killer.id] = victim.fear.get(killer.id, 0) + 1
 
 
@@ -1557,10 +1859,22 @@ def simulate_match(players: List[Player], match_number: int):
         if mod.enabled:
             mod.on_match_start(players, match_number, CONFIG)
 
+    weather_reports = [
+        "☀️ Clear skies. Perfect conditions for high-kill games.",
+        "🌧️ Light rain reported. The Storm feels extra cold today...",
+        "🌫️ Heavy fog. Expect close-quarters combat in the mid-game.",
+        "🌩️ Thunderstorms detected. The Storm is highly unstable!",
+        "🌬️ High winds. Watch your rotations carefully.",
+        "☄️ Strange atmospheric activity. Something is coming..."
+    ]
+    current_weather = random.choice(weather_reports)
+
     print("\n" + "━" * 50)
     print(f"🪂 GAME {match_number} / {CONFIG['matches']} — BATTLE BUS LAUNCHING")
     print("━" * 50)
     sim_sleep(1)
+    print(current_weather)
+    sim_sleep(1.5)
 
     print(f"🏝️ {len(players)} players drop into the island")
     sim_sleep(1)
@@ -1598,6 +1912,22 @@ def simulate_match(players: List[Player], match_number: int):
 
     print("\n🪂 Players are now landing on the island…")
     sim_sleep(2)
+
+    for p in players:
+        p.loot = 0.0
+        p.contested_drop = False
+        p.time_since_fight = 0
+
+    drop_counts = {}
+    for p in players:
+        if p.drop_poi not in drop_counts:
+            drop_counts[p.drop_poi] = []
+        drop_counts[p.drop_poi].append(p)
+
+    for poi, droppers in drop_counts.items():
+        if len(droppers) > 1:
+            for p in droppers:
+                p.contested_drop = True
 
     pre_dead_count = 0
     for player in players:
@@ -1655,6 +1985,10 @@ def simulate_match(players: List[Player], match_number: int):
     late_game = match_number >= CONFIG["matches"] - 2
 
     def should_fight(attacker, defender):
+        if attacker.contested_drop and attacker.time_since_fight <= 2:
+            if defender.drop_poi == attacker.drop_poi:
+                return True
+
         if defender.skill > attacker.skill + 15:
             return False
         if attacker.skill > defender.skill + 10:
@@ -1678,7 +2012,15 @@ def simulate_match(players: List[Player], match_number: int):
             base *= 1.35
         elif player.current_archetype == "Passive":
             base *= 0.8
-        base *= (1.0 + player.confidence * 0.15)
+
+        confidence_boost = 0.15
+        if player.skill >= 100:
+            confidence_boost = 0.20
+        base *= (1.0 + player.confidence * confidence_boost)
+
+        loot_boost = 1.0 + (player.loot * 0.15)
+        base *= loot_boost
+
         fear_level = player.fear.get(target.id, 0)
         base *= max(0.65, 1 - fear_level * 0.08)
         if late_game and player.skill >= 85:
@@ -1691,7 +2033,15 @@ def simulate_match(players: List[Player], match_number: int):
             base *= 1.1
         elif player.current_archetype == "Aggressive":
             base *= 0.9
-        base *= (1.0 + player.confidence * 0.1)
+
+        confidence_boost = 0.1
+        if player.skill >= 100:
+            confidence_boost = 0.15
+        base *= (1.0 + player.confidence * confidence_boost)
+
+        loot_boost = 1.0 + (player.loot * 0.12)
+        base *= loot_boost
+
         fear_level = player.fear.get(attacker.id, 0)
         base *= max(0.65, 1 - fear_level * 0.08)
         return max(base, 1)
@@ -1704,7 +2054,10 @@ def simulate_match(players: List[Player], match_number: int):
             sim_sleep(1.5)
 
         attacker = choose_attacker(alive)
-        defender = choose_target(attacker, alive)
+        defender = choose_target(attacker, alive, match_number, CONFIG)
+
+        hatred = attacker.rivals.get(defender.id, 0)
+        is_toxic_grief = hatred >= 5 and random.random() < 0.3
 
         if not attacker.alive or not defender.alive:
             alive = [p for p in alive if p.alive]
@@ -1721,7 +2074,13 @@ def simulate_match(players: List[Player], match_number: int):
             continue
 
         if not should_fight(attacker, defender):
-            continue
+            if not is_toxic_grief:
+                continue
+            else:
+                if random.random() < 0.05:
+                    print(
+                        f"{Colors.SOFT_RED}{Colors.ITALIC}🔥 {display_name(attacker)} is hunting down {display_name(defender)} — this rivalry has gotten personal!{Colors.RESET}")
+                    sim_sleep(0.5)
 
         p1, p2 = attacker, defender
 
@@ -1730,7 +2089,12 @@ def simulate_match(players: List[Player], match_number: int):
 
         p1_win_chance = atk1 / (atk1 + def2)
         skill_gap = abs(p1.skill - p2.skill)
-        variance_modifier = max(0.25, 1 - skill_gap / 100)
+
+        if p1.skill >= 100 or p2.skill >= 100:
+            variance_modifier = max(0.35, 1 - skill_gap / 80)
+        else:
+            variance_modifier = max(0.25, 1 - skill_gap / 100)
+
         roll = random.random() * variance_modifier
 
         current_leaderboard = sorted(players, key=lambda p: p.total_points, reverse=True)[:5]
@@ -1751,7 +2115,23 @@ def simulate_match(players: List[Player], match_number: int):
 
         if roll < p1_win_chance:
             elims[p1.id] += 1
-            register_elim(p1, p2)
+            register_elim(p1, p2, match_number)
+
+            rivalry_p1_to_p2 = p1.rivals.get(p2.id, 0)
+            rivalry_p2_to_p1 = p2.rivals.get(p1.id, 0)
+
+            if rivalry_p1_to_p2 >= 5:
+                conf_boost = min(0.3, 0.15 + (rivalry_p1_to_p2 - 5) * 0.02)
+                p1.confidence = min(1.0, p1.confidence + conf_boost)
+
+            if rivalry_p2_to_p1 >= 5:
+                conf_loss = min(0.25, 0.12 + (rivalry_p2_to_p1 - 5) * 0.02)
+                p2.confidence = max(-1.0, p2.confidence - conf_loss)
+
+            p1.loot = max(0.0, p1.loot - 0.1)
+            looted_amount = p2.loot * 0.7
+            p1.loot = min(1.0, p1.loot + looted_amount)
+            p1.time_since_fight = 0
 
             if is_reload:
                 reboots[p1.id] += 1
@@ -1762,6 +2142,8 @@ def simulate_match(players: List[Player], match_number: int):
                 print(
                     f"{colored_name(p1)} {emoji} {colored_name(p2)} {Colors.SOFT_GREEN}(REBOOTED! {reboots[p2.id]} left){Colors.RESET}")
                 p2.confidence = max(0.5, p2.confidence * 0.92)
+                p2.loot = max(0.0, p2.loot - 0.25)
+                p2.time_since_fight = 0
             else:
                 p2.alive = False
                 alive.remove(p2)
@@ -1776,7 +2158,23 @@ def simulate_match(players: List[Player], match_number: int):
                         mod.on_player_eliminated(p2, p1, CONFIG)
         else:
             elims[p2.id] += 1
-            register_elim(p2, p1)
+            register_elim(p2, p1, match_number)
+
+            rivalry_p2_to_p1 = p2.rivals.get(p1.id, 0)
+            rivalry_p1_to_p2 = p1.rivals.get(p2.id, 0)
+
+            if rivalry_p2_to_p1 >= 5:
+                conf_boost = min(0.3, 0.15 + (rivalry_p2_to_p1 - 5) * 0.02)
+                p2.confidence = min(1.0, p2.confidence + conf_boost)
+
+            if rivalry_p1_to_p2 >= 5:
+                conf_loss = min(0.25, 0.12 + (rivalry_p1_to_p2 - 5) * 0.02)
+                p1.confidence = max(-1.0, p1.confidence - conf_loss)
+
+            p2.loot = max(0.0, p2.loot - 0.1)
+            looted_amount = p1.loot * 0.7
+            p2.loot = min(1.0, p2.loot + looted_amount)
+            p2.time_since_fight = 0
 
             if is_reload:
                 reboots[p2.id] += 1
@@ -1787,6 +2185,8 @@ def simulate_match(players: List[Player], match_number: int):
                 print(
                     f"{colored_name(p2)} {emoji} {colored_name(p1)} {Colors.SOFT_GREEN}(REBOOTED! {reboots[p1.id]} left){Colors.RESET}")
                 p1.confidence = max(0.5, p1.confidence * 0.92)
+                p1.loot = max(0.0, p1.loot - 0.25)
+                p1.time_since_fight = 0
             else:
                 p1.alive = False
                 alive.remove(p1)
@@ -1799,6 +2199,18 @@ def simulate_match(players: List[Player], match_number: int):
                 for mod in ACTIVE_MODS:
                     if mod.enabled:
                         mod.on_player_eliminated(p1, p2, CONFIG)
+
+        for p in alive:
+            if p != attacker and p != defender:
+                p.time_since_fight += 1
+                if p.contested_drop and p.time_since_fight <= 3:
+                    loot_gain = 0.03
+                elif p.time_since_fight <= 5:
+                    loot_gain = 0.08
+                else:
+                    loot_gain = 0.05
+
+                p.loot = min(1.0, p.loot + loot_gain)
 
         sim_sleep(0.25)
 
@@ -1822,6 +2234,22 @@ def simulate_match(players: List[Player], match_number: int):
     winner.alive = True
     if CONFIG["tournament_type"] == "VICTORY_CUP":
         winner.career_victorycup_wins += 1
+
+    for p in players:
+        for rival_id, rivalry_level in p.rivals.items():
+            if rivalry_level >= 5:
+                rival = next((r for r in players if r.id == rival_id), None)
+                if rival and not p.alive and rival.alive:
+                    conf_loss = 0.05 + (rivalry_level - 5) * 0.01
+                    p.confidence = max(-1.0, p.confidence - min(0.15, conf_loss))
+
+                elif rival and p.alive and not rival.alive:
+                    rival_killer = next((k for k in players if rival_id in [v.id for v in players if
+                                                                            not v.alive and k.rivals.get(v.id, 0) > 0]),
+                                        None)
+                    if rival_killer and rival_killer.id != p.id:
+                        conf_loss = 0.03 + (rivalry_level - 5) * 0.005
+                        p.confidence = max(-1.0, p.confidence - min(0.1, conf_loss))
 
     for p in players:
         placement = placements.get(p.id, len(players))
@@ -1856,7 +2284,7 @@ def simulate_match(players: List[Player], match_number: int):
     print(f"• Total Points: {winner.total_points}")
     sim_sleep(1)
 
-    print(f"\n👑 {commentary}\n")
+    print(f"\n👑 {Colors.ITALIC}{commentary}{Colors.RESET}\n")
     sim_sleep(1)
     print("━" * 50)
     sim_sleep(1)
@@ -1967,7 +2395,20 @@ def simulate_tournament():
 
     num_pro_players = min(len(pro_players_skills), CONFIG["players"])
 
-    for i, (name, skill, arch, org) in enumerate(pro_players_skills[:num_pro_players]):
+    weights = [skill ** 2.5 for name, skill, arch, org in pro_players_skills]
+
+    weighted_pool = []
+    for i, player in enumerate(pro_players_skills):
+        w = weights[i]
+        key = random.random() ** (1.0 / w)
+        weighted_pool.append((key, player))
+
+    weighted_pool.sort(key=lambda x: x[0], reverse=True)
+    selected_pros = [player for key, player in weighted_pool[:num_pro_players]]
+
+    selected_pros.sort(key=lambda x: x[1], reverse=True)
+
+    for i, (name, skill, arch, org) in enumerate(selected_pros):
         variance = random.uniform(-0.05, 0.05)
         adjusted_skill = round(skill * (1 + variance))
         adjusted_skill = max(1, adjusted_skill)
@@ -1999,6 +2440,38 @@ def simulate_tournament():
 
     assign_archetypes(players)
 
+    players.sort(key=lambda p: p.skill, reverse=True)
+
+    for i, p in enumerate(players):
+        p.id = i
+
+    social_data = load_social_data()
+
+    for p in players:
+        p_key = p.name
+
+        if p_key in social_data.get("friendships", {}):
+            for friend_name, strength in social_data["friendships"][p_key].items():
+                friend = next((other for other in players if other.name == friend_name), None)
+                if friend:
+                    p.friends.add(friend.id)
+
+        if p_key in social_data.get("rivalries", {}):
+            for rival_name, hatred in social_data["rivalries"][p_key].items():
+                rival = next((other for other in players if other.name == rival_name), None)
+                if rival:
+                    p.rivals[rival.id] = hatred
+
+    for p in players:
+        if len(p.friends) < 2:
+            num_needed = random.randint(2, 3) - len(p.friends)
+            potential_friends = [other for other in players if other.id != p.id and other.id not in p.friends]
+            if len(potential_friends) >= num_needed:
+                chosen_friends = random.sample(potential_friends, num_needed)
+                for friend in chosen_friends:
+                    p.friends.add(friend.id)
+                    friend.friends.add(p.id)
+
     for mod in ACTIVE_MODS:
         if mod.enabled:
             mod.on_tournament_start(players, CONFIG)
@@ -2017,6 +2490,7 @@ def simulate_tournament():
 
     update_careers(players)
     save_career_data(players)
+    update_social_data(players)
     print(f"{Colors.LIGHT_GRAY}💾 Career data saved (backup created){Colors.RESET}")
     init_season_players(players)
     update_season_stats(players)
@@ -2537,7 +3011,7 @@ def show_player_history(players: List[Player]):
                 print(f"  FNCS Titles:           {player.career_fncs_wins:,}")
                 print(f"  Total Major Wins:      {get_major_wins(player):,}")
                 print(f"  Elite Series Wins:     {player.career_elite_series_wins:,}")
-                print(f"  Reload Solos Wins:     {player.career_reload_wins:,}")
+                print(f"  Reload Wins:           {player.career_reload_wins:,}")
                 print(f"  Cash Cup Wins:         {player.career_cashcup_wins:,}")
                 print(f"  Victory Cup Game Wins: {player.career_victorycup_wins:,}")
                 print(f"  Overall Tournament Wins: {player.career_wins:,}")
@@ -2995,8 +3469,13 @@ def save_management_menu():
             for i, save_info in enumerate(saves, 1):
                 is_current = " ← CURRENT" if save_info["name"] == current else ""
                 print(f"{i}. {Colors.BOLD}{save_info['name']}{Colors.RESET}{is_current}")
-                print(
-                    f"   Season {save_info['season']} | {save_info['region']} | {save_info['tournaments']} tournaments")
+
+                if save_info["regions"]:
+                    for region, region_data in sorted(save_info["regions"].items()):
+                        print(f"   {region}: Season {region_data['season']} | {region_data['tournaments']} tournaments")
+                else:
+                    print("   No data yet")
+
                 print(f"   Last played: {save_info['last_played']}")
                 if i < len(saves):
                     print()
@@ -3118,6 +3597,297 @@ def save_management_menu():
             sim_sleep(0.8)
 
 
+def how_to_play_guide():
+    while True:
+        print("\n" + "━" * 60)
+        print("📖 HOW TO PLAY - FORTNITE TOURNAMENT SIMULATOR")
+        print("━" * 60)
+        print("1. Config Options")
+        print("2. Understanding the Kill Feed")
+        print("3. Tournament Types")
+        print("4. Mods System")
+        print("5. Player Mechanics")
+        print("6. Career & Season Stats")
+        print("B. Back to Main Menu")
+        print("━" * 60)
+
+        choice = input("> ").strip().lower()
+
+        if choice == "b":
+            break
+
+        elif choice == "1":
+            print("\n" + "━" * 60)
+            print("⚙️  CONFIG OPTIONS")
+            print("━" * 60)
+            print("\n📊 PLAYERS:")
+            print("  Number of players in each tournament")
+            print("  • More players = longer games, more variance")
+            print("  • Fewer players = faster, more consistent results")
+
+            print("\n🎮 MATCHES:")
+            print("  Number of games per tournament")
+            print("  • Standard tournaments: 6-12 games")
+            print("  • More games = more consistent rankings")
+
+            print("\n🌀 STORM CIRCLES:")
+            print("  Number of storm phases per game")
+            print("  • More circles = longer games, more fights")
+            print("  • Fewer circles = faster games, early aggression")
+
+            print("\n💀 ELIM POINTS:")
+            print("  Points awarded per elimination")
+            print("  • Higher = fragging is more rewarded")
+            print("  • Lower = placement matters more")
+
+            print("\n🏆 TOURNAMENT TYPE:")
+            print("  Changes format, prize pool, and scoring")
+            print("  • Cash Cup: Standard competitive format")
+            print("  • Elite Series: Higher stakes, better players")
+            print("  • FNCS: Major tournament with prestige")
+            print("  • LAN: Offline event, highest prestige")
+            print("  • RELOAD: 40 players, respawn mechanic")
+            print("  • Victory Cup: Battle Royale, winner-takes-all")
+
+            print("\n🌍 REGION:")
+            print("  Player pool and competition level")
+            print("  • EU: Toughest competition")
+            print("  • NA: High skill ceiling")
+            print("  • MIXED: Best of EU + NA for LANs")
+
+            print("\n🚶 WALKOUTS:")
+            print("  Player introductions before tournament")
+            print("  • ON: Shows hype walkouts (adds time)")
+            print("  • OFF: Skip straight to tournament")
+
+            print("\n🎯 ARCHETYPE SWITCHING:")
+            print("  Players can change playstyle if underperforming")
+            print("  • ON: Dynamic adaptation mid-tournament")
+            print("  • OFF: Players stick to their style")
+
+            print("\n📺 KILLFEED HIGHLIGHTS:")
+            print("  Emphasizes top 5 players in kill feed")
+            print("  • ON: Gold names for leaderboard players")
+            print("  • OFF: Standard kill feed")
+
+            input("\nPress Enter to continue...")
+
+        elif choice == "2":
+            print("\n" + "━" * 60)
+            print("🎯 UNDERSTANDING THE KILL FEED")
+            print("━" * 60)
+
+            print("\n🌟 GOLD NAMES:")
+            print(f"  {Colors.SOFT_GOLD}Bugha{Colors.RESET} ⚔️ Clix")
+            print("  = Player is currently in top 5 on leaderboard")
+
+            print("\n💀 EMOTES:")
+            print(f"  {Colors.SOFT_PURPLE}💀 Clix hits the emote on Bugha!{Colors.RESET}")
+            print("  = Disrespectful elimination, major rivalry boost")
+
+            print("\n🔥 TOXIC RIVALRIES:")
+            print(f"  {Colors.SOFT_RED}🔥 Bugha is hunting down Clix — this rivalry has gotten personal!{Colors.RESET}")
+            print("  = Player ignoring strategy to grief their rival")
+
+            print("\n✅ REVENGE:")
+            print(f"  {Colors.SOFT_GREEN}✅ Bugha finally got revenge on Clix!{Colors.RESET}")
+            print("  = Player eliminated their toxic rival (8+ rivalry)")
+
+            print("\n⭐ CLUTCH ELIMINATIONS:")
+            print("  ⭐ CLUTCH ELIM! Bugha ⚔️ Clix")
+            print("  = Clutch player getting kill in high-pressure situation")
+
+            print("\n🔄 RELOAD MODE:")
+            print(f"  Bugha 🔄 Clix {Colors.SOFT_GREEN}(REBOOTED! 2 left){Colors.RESET}")
+            print("  = Player used a reboot to respawn")
+            print(f"  Bugha ⚔️ Clix {Colors.SOFT_RED}(OUT OF REBOOTS){Colors.RESET}")
+            print("  = Player eliminated with no reboots left")
+
+            input("\nPress Enter to continue...")
+
+        elif choice == "3":
+            print("\n" + "━" * 60)
+            print("🏆 TOURNAMENT TYPES")
+            print("━" * 60)
+
+            print("\n💰 CASH CUP:")
+            print("  • Standard competitive format")
+            print("  • Prize pool: $10K first place")
+            print("  • Career weight: 12 points per win")
+
+            print("\n⭐ ELITE SERIES:")
+            print("  • Standard competitive format with higher stakes")
+            print("  • Prize pool: $50K first place")
+            print("  • Career weight: 25 points per win")
+
+            print("\n🔄 RELOAD SOLOS:")
+            print("  • 40 players, 8 games")
+            print("  • Respawn mechanic: kill = +1 reboot")
+            print("  • Reboots disable at 50% remaining")
+            print("  • Prize pool: $40K first place")
+            print("  • Career weight: 18 points per win")
+            print("  • Custom point system for smaller lobby")
+
+            print("\n🏆 FNCS (MAJOR):")
+            print("  • Highest stakes online tournament")
+            print("  • Prize pool: $100K first place")
+            print("  • Career weight: 90 points per win")
+
+            print("\n🏟️  LAN (MAJOR):")
+            print("  • Offline championship event")
+            print("  • Prize pool: $250K first place")
+            print("  • Career weight: 120 points per win")
+
+            print("\n👑 VICTORY CUP:")
+            print("  • Battle Royale format")
+            print("  • Points only for Victory Royales")
+            print("  • Prize pool: $400 per game win")
+            print("  • Career weight: 8 points per win")
+
+            input("\nPress Enter to continue...")
+
+        elif choice == "4":
+            print("\n" + "━" * 60)
+            print("🎮 MODS SYSTEM")
+            print("━" * 60)
+
+            print("\n💥 TECHNICAL ISSUES:")
+            print("  • Players can crash or fail to load")
+            print("  • Adds realism to tournament chaos")
+
+            print("\n😤 RAGE QUIT:")
+            print("  • Tilted players may quit mid-tournament")
+            print("  • More likely after bad performances")
+
+            print("\n🔙 ZERO BUILD FLASHBACK:")
+            print("  • Players suddenly play like it's Zero Build")
+            print("  • Temporary skill debuff")
+
+            print("\n👀 STREAM SNIPED:")
+            print("  • Players get targeted by stream snipers")
+            print("  • Can ruin good tournament runs")
+
+            print("\n💎 CLUTCH FACTOR:")
+            print("  • 25% players are clutch (better under pressure)")
+            print("  • 25% players are chokers (worse under pressure)")
+            print("  • Pressure situations: top 15 alive, final 3 games")
+
+            print("\n🌐 PING DIFF:")
+            print("  • Some players get bad connection")
+            print("  • Affects fight outcomes negatively")
+
+            print("\nMods can be toggled in 'Mods & Extras' menu")
+
+            input("\nPress Enter to continue...")
+
+        elif choice == "5":
+            print("\n" + "━" * 60)
+            print("👤 PLAYER MECHANICS")
+            print("━" * 60)
+
+            print("\n🎯 SKILL (1-113):")
+            print("  • Base fighting ability")
+            print("  • ±5% variance each tournament")
+            print("  • Top players: 105-113")
+            print("  • Mid tier: 90-104")
+            print("  • Lower tier: 75-89")
+
+            print("\n😊 CONFIDENCE (-1.0 to 1.0):")
+            print("  • Affected by placements each game")
+            print("  • Top 5% finish: +confidence")
+            print("  • Bottom 5% finish: -confidence")
+            print("  • Boosts attack/defense when high")
+
+            print("\n🎒 LOOT (0.0 to 1.0):")
+            print("  • Gradually increases when not fighting")
+            print("  • Lost when fighting, refreshed from kills")
+            print("  • +15% attack, +12% defense at full loot")
+            print("  • Contested drops = slower loot gain")
+
+            print("\n🔥 RIVALRIES:")
+            print("  • Build up from repeated eliminations")
+            print("  • Emoting: +2.0 to +3.5 rivalry")
+            print("  • Dying to worse player: +1.5 to +2.5")
+            print("  • Crucial placement grief: +1.2 to +2.0")
+            print("  • 5+ rivalry = toxic griefing starts")
+            print("  • Killing rival = confidence boost")
+            print("  • Dying to rival = confidence loss")
+            print("  • Persists across tournaments in social_data.json")
+            print("  • Decays by 25% each tournament if no new interactions")
+            print("  • After 3-5 tournaments with no beef, rivalry fades completely")
+
+            print("\n 🫂 FRIENDSHIPS:")
+            print("  • Every player starts with 2-3 mutual friends")
+            print("  • Friendship strength: 0.0 (broken) to 2.0 (best friends)")
+            print("  • Grows: Both place well together, don't fight each other, loyalty")
+            print("  • Decays: Killing friends, griefing in crucial moments, big placement gaps")
+            print("  • Under 0.3 strength: friendship dissolved")
+            print("  • 1.5+ strength: best friends")
+            print("  • 1.0-1.5 strength: good friends")
+            print("  • Under 1.0 strength: weakening")
+            print("  • In crucial moments, with the tournament on the line, players will still target their friends")
+            print("  • Persists across tournaments in social_data.json")
+
+            print("\n🎭 ARCHETYPES:")
+            print("  • Fragger: +20% attack")
+            print("  • Aggressive: +35% attack, -10% defense")
+            print("  • Passive: -20% attack, +10% defense")
+            print("  • Strategist: Balanced, smart positioning")
+            print("  • Rat: Avoids fights, survives longer")
+
+            print("\n⚡ TOURNAMENT PRESSURE (Final 2-3 Games):")
+            print("  • Players adjust strategy based on placement")
+            print("  • 2nd place far behind 1st = grief mode")
+            print("  • 1st place ahead = play defensive")
+            print("  • Bubble players = desperate aggression")
+
+            input("\nPress Enter to continue...")
+
+        elif choice == "6":
+            print("\n" + "━" * 60)
+            print("📊 CAREER & SEASON STATS")
+            print("━" * 60)
+
+            print("\n🏆 CAREER STATS:")
+            print("  • Persist across all seasons forever")
+            print("  • Track tournament wins by type")
+            print("  • Career earnings accumulate")
+            print("  • Top 10 finishes saved as achievements")
+
+            print("\n📈 GOAT INDEX:")
+            print("  Career ranking formula:")
+            print("  • LAN wins: 120 points each")
+            print("  • FNCS wins: 90 points each")
+            print("  • Elite Series wins: 25 points each")
+            print("  • RELOAD wins: 18 points each")
+            print("  • Cash Cup wins: 12 points each")
+            print("  • Victory Cup wins: 8 points each")
+            print("  • Top 10 finishes: 4 points each")
+            print("  • Career earnings: 1 point per $100K")
+
+            print("\n📆 SEASON STATS:")
+            print("  • Reset every 16 tournaments")
+            print("  • Track season champion and top performers")
+            print("  • Season leaderboard for competitive rankings")
+
+            print("\n💾 SAVE FILES:")
+            print("  • Multiple saves = separate careers")
+            print("  • Each save has isolated stats")
+            print("  • Auto-backup after every tournament")
+            print("  • Can restore from last 20 backups")
+
+            print("\n🎯 CAREER HIGHLIGHTS:")
+            print("  • Shows your best tournament finishes")
+            print("  • Weighted by tournament prestige")
+            print("  • LAN 1st > FNCS 1st > Elite 1st > etc.")
+
+            input("\nPress Enter to continue...")
+
+        else:
+            print("❌ Invalid option")
+            sim_sleep(0.5)
+
+
 def main_menu():
     if not get_current_save() or get_current_save() == "":
         set_current_save("default")
@@ -3141,6 +3911,7 @@ def main_menu():
         print("4. Tournament Templates")
         print("5. Mods & Extras")
         print("6. Save Management")
+        print("7. How to Play")
         print("0. Exit")
         print("━" * 50)
 
@@ -3212,6 +3983,9 @@ def main_menu():
 
         elif choice == "6":
             save_management_menu()
+
+        elif choice == "7":
+            how_to_play_guide()
 
         elif choice == "0":
             current_save = get_current_save()
